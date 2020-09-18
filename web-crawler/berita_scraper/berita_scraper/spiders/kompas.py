@@ -1,6 +1,8 @@
 from scrapy import Spider
 from scrapy import Request
 
+from datetime import datetime
+
 from berita_scraper.items import BeritaScraperItem
 
 class KompasSpider(Spider):
@@ -13,7 +15,11 @@ class KompasSpider(Spider):
 	# METHOD INISIASI
 	def __init__(self, situs="all", tanggal=None):
 		self.situs = situs
-		self.tanggal = tanggal
+
+		if (tanggal is None):
+			self.tanggal = datetime.now().strftime("%Y/%m/%d")
+		else:
+			self.tanggal = tanggal
 
 	# METHOD REQUEST PERTAMA
 	def start_requests(self):
