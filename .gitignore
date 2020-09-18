@@ -1,4 +1,6 @@
 .scrapy/
 __pycache__/
+
+settings.py
 *.csv
 *.json

@@ -45,6 +45,6 @@ class OkezoneSpider(Spider):
 					'kategori'	: response.xpath('//div[@class="breadcrumb"]/ul//li//text()').extract()[1:],
 					'tanggal'	: response.xpath('//div[@class="namerep"]/b/text()').extract_first(),
 					'isi'		: response.xpath('//div[@id="contentx"]/p//text()').extract(),
-					'jumlah_komentar_share' : response.xpath('//li[@class="totshare"]/a/span/text()').extract_first(),
+					'jumlah_sk' : response.xpath('//li[@class="totshare"]/a/span/text()').extract_first(),
 					})
 		yield item
