@@ -15,18 +15,12 @@ class KompasSpider(Spider):
 	# METHOD INISIASI
 	def __init__(self, kategori="all", tanggal=None):
 		self.kategori = kategori
-
-		if (tanggal is None):
-			self.tanggal = datetime.now().strftime("%Y-%m-%d")
-		else:
-			self.tanggal = tanggal
+		self.tanggal = tanggal if tanggal is not None else datetime.now().strftime("%Y-%m-%d")
 
 	# METHOD REQUEST PERTAMA
 	def start_requests(self):
 		for url in self.start_urls:
-			absolute_url = url + "/?site=" + self.kategori
-			if(self.tanggal is not None):
-				absolute_url += "&date=" + self.tanggal
+			absolute_url = url + "/?site={}&date={}".format(k=self.kategori, t=self.tanggal)
 			
 			# Request URL
 			yield Request(url=absolute_url, callback=self.parse)

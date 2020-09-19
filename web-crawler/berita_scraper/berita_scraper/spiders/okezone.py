@@ -1,27 +1,27 @@
 from scrapy import Spider
 from scrapy import Request
 
+from datetime import datetime
+
 from berita_scraper.items import BeritaScraperItem
 
 class OkezoneSpider(Spider):
 	name = 'okezone'
 	allowed_domains = ['okezone.com']
 	start_urls = [
-		'http://news.okezone.com/indeks',
+		'http://index.okezone.com',
 	]
 
 	# METHOD INISIASI
-	def __init__(self, situs="all", tanggal=None):
-		self.situs = situs
-		self.tanggal = tanggal
+	def __init__(self, kategori="1", tanggal=None):
+		self.kategori = kategori
+		self.tanggal = tanggal if tanggal is not None else datetime.now().strftime("%Y/%m/%d")
 
 	# METHOD REQUEST PERTAMA
 	def start_requests(self):
 		for url in self.start_urls:
-			absolute_url = url + '/'
-			if(self.tanggal is not None):
-				absolute_url += self.tanggal
-			
+			absolute_url = url + '/bydate/channel/{t}/{k}'.format(k=self.kategori, t=self.tanggal)
+
 			# Request URL
 			yield Request(url=absolute_url, callback=self.parse)
 
