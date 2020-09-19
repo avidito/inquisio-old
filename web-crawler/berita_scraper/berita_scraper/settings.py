@@ -64,6 +64,7 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 5
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    'berita_scraper.pipelines.KompasPipeline': 300,
+   'berita_scraper.pipelines.OkezonePipeline': 301,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

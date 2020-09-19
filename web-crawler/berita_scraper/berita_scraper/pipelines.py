@@ -52,3 +52,42 @@ class KompasPipeline:
 		item['isi'] = ' '.join(item['isi'])
 
 		return item
+
+# Okezone
+class OkezonePipeline:
+	def process_item(self, item, spider):
+		if spider.name not in ['okezone']:
+			return item
+
+		# Judul
+		# Menggabungkan seluruh bagian judul
+		judul = ' '.join([kata.strip() for kata in item['judul']])
+
+		# Mengecilkan seluruh tulisan
+		item['judul'] = judul.lower()
+
+		# Kategori
+		# Menggabungkan kategori dan sub kategori dengan '|'
+		item['kategori'] = ' | '.join(item['kategori'])
+
+		# Tanggal
+		# Mengambil bagian tanggal saja
+		item['tanggal'] = ' '.join(item['tanggal'].split(' ')[1:4]) 
+		
+		# Jumlah Komentar
+		# Mengonversi menjadi angka
+		item['jumlah_sk'] = int(item['jumlah_sk'])
+
+		# Isi.
+		# Menghilangkan iklan atau referensi ke artikel lain
+		iklan_idx = [idx for (idx, val) in enumerate(item['isi']) if val.startswith('Baca juga')]
+		for i in range(len(iklan_idx)-1, -1, -1):
+			del item['isi'][iklan_idx[i]+1]
+			del item['isi'][iklan_idx[i]]
+
+		# Menggabungkan seluruh bagian teks menjadi bagian yang utuh
+		for idx in range(len(item['isi'])):
+			item['isi'][idx] = item['isi'][idx].strip()
+		item['isi'] = ' '.join(item['isi'])
+		
+		return item
