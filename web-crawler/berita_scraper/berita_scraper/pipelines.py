@@ -11,3 +11,13 @@ from itemadapter import ItemAdapter
 class BeritaScraperPipeline:
     def process_item(self, item, spider):
         return item
+
+# Kompas
+class KompasPipeline:
+	def process_item(self, item, spider):
+		if spider.name not in ['kompas']:
+			return item
+
+		# Pra-proses
+		item['judul'] = item['judul'].lower()
+		return item
