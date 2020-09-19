@@ -28,13 +28,13 @@ class OkezoneSpider(Spider):
 	# METHOD PARSE UTAMA
 	def parse(self, response):
 		# Ekstraksi URL dari artikel dan request ke URL artikel
-		daftar_url_berita = response.xpath('//li[@class="col-md-12 p-nol m-nol hei-index"]//h4/a/@href').extract()
+		daftar_url_berita = response.xpath('//h4[@class="f17"]/a/@href').extract()
 		for url_berita in daftar_url_berita:
 			absolute_url_berita = url_berita
 			yield Request(url=absolute_url_berita, callback=self.parse_info)
 
 		# Request ke halaman berikutnya
-		url_halaman_berikutnya = response.xpath('//a[@rel="next"]/@href').extract_first()
+		url_halaman_berikutnya = response.xpath('//a[contains(text(), "Next>")]/@href').extract_first()
 		absolute_url_halaman_berikutnya = response.urljoin(url_halaman_berikutnya)
 		yield Request(url=absolute_url_halaman_berikutnya, callback=self.parse)
 	
