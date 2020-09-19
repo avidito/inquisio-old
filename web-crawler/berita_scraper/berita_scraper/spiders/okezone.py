@@ -41,10 +41,32 @@ class OkezoneSpider(Spider):
 	# METHOD PARSE INFO
 	def parse_info(self, response):
 		item = BeritaScraperItem({
-					'judul'		: response.xpath('//div[@class="title"]/h1/text()').extract_first(),
+					'judul'		: response.xpath('//div[@class="title"]/h1//text()').extract(),
 					'kategori'	: response.xpath('//div[@class="breadcrumb"]/ul//li//text()').extract()[1:],
 					'tanggal'	: response.xpath('//div[@class="namerep"]/b/text()').extract_first(),
-					'isi'		: response.xpath('//div[@id="contentx"]/p//text()').extract(),
+					'isi' 		: response.xpath('//div[@id="contentx"]/p//text()').extract(),
 					'jumlah_sk' : response.xpath('//li[@class="totshare"]/a/span/text()').extract_first(),
 					})
-		yield item
+
+		# Menambahkan isi pada halaman berbeda (jika ada)
+		url_selanjutnya = response.xpath('//span[text()="Selanjutnya"]/parent::a/@href').extract_first()
+		if (url_selanjutnya is None):
+			yield item
+		else:
+			yield Request(url=url_selanjutnya, meta={'item': item}, callback=self.parse_isi_berita)
+		
+	# METHOD PARSE ISI BERITA DENGAN BANYAK HALAMAN
+	def parse_isi_berita(self, response):
+		item = response.meta['item']
+		tambahan = response.xpath('//div[@id="contentx"]/p//text()').extract()
+		item['isi'].extend(tambahan)
+
+		# Jika masih ada halaman lagi
+		url_selanjutnya = response.xpath('//span[text()="Selanjutnya"]/parent::a/@href').extract_first()
+		if (url_selanjutnya is None):
+			yield item
+		else:
+			yield Request(url=url_selanjutnya, meta={'item': item}, callback=self.parse_isi_berita)
+
+
+
