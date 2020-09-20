@@ -52,3 +52,29 @@ class KompasPipeline:
 		item['isi'] = ' '.join(item['isi'])
 
 		return item
+
+class DetikPipeline:
+	def process_item(self, item, spider):
+		if spider.name not in ['detik']:
+			return item
+
+		# Judul
+		# Menggabungkan seluruh kata pada judul
+		judul = item['judul'].strip()
+
+		# Mengecilkan seluruh tulisan
+		item['judul'] = judul.lower()
+
+		# Tanggal
+		# Mengambil bagian tanggal saja
+		item['tanggal'] = ' '.join(item['tanggal'].split(' ')[1:4])
+
+		# Isi
+		# Menggabungkan seluruh bagain teks menjadi utuh
+		item['isi'] = ''.join([kata for kata in item['isi']])
+
+		# Jumlah Komentar
+		# Mengambil angka yang merupakan jumlah komentar
+		item['jumlah_sk'] = int(item['jumlah_sk'].split(' ')[0])
+
+		return item
