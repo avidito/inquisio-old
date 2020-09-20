@@ -4,9 +4,9 @@ from itemadapter import ItemAdapter
 # Buat pipeline untuk masing masing spider
 # Berikan nama pipeline sama dengan nama spider
 # Contoh : KompasPipeline
-class SpiderPipeline:
+class TemplatePipeline:
 	def process_item(self, item, spider):
-		if spider.name not in ['spider']:
+		if spider.name not in ['template']:
 			return item
 
 		# Pra-proses tiap Field (jika dibutuhkan)
@@ -16,4 +16,4 @@ class SpiderPipeline:
 # Registrasi SpiderPipeline ke ITEM_PIPELINES di settings.py
 # dengan menambahkan baris seperti berikut (berikan angka 
 # lebih besar (+1) dari pipeline di atasnya):
-# 'berita_scraper.pipelines.SpiderPipeline': 301,
+# 'berita_scraper.pipelines.TemplatePipeline': 301,
