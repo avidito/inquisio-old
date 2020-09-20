@@ -62,9 +62,9 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 5
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'repository_scraper.pipelines.RepositoryScraperPipeline': 300,
-#}
+ITEM_PIPELINES = {
+   'repository_scraper.pipelines.UnairPipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
