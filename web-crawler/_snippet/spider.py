@@ -30,16 +30,14 @@ class TemplateSpider(Spider):
 	# Gunakan 'kategori' dan 'tanggal' sebagai nama argumen
 	def __init__(self, kategori="all", tanggal=None):
 		self.kategori = kategori
-		self.tanggal = tanggal
+		self.tanggal = tanggal if tanggal is None else datetime.now().strftime("%Y/%m/%d")
 
 	# METHOD REQUESTS PERTAMA
 	# Definisikan start_requests() untuk praproses dan request URL.
 	# Kombinasikan URL dengan argumen 'kategori' dan 'tanggal'.
 	def start_requests(self):
 		for url in self.start_urls:
-			absolute_url = url + "/?site=" + self.kategori
-			if(self.tanggal is not None):
-				absolute_url += "&date=" + self.tanggal
+			absolute_url = url + "/?site={k}&date={t}".format(k=self.kategori, t=self.tanggal)
 			
 			# Request URL. Pilih salah satu:
 			# Request Normal
@@ -96,6 +94,6 @@ class TemplateSpider(Spider):
 					'kategori'	: response.xpath('//*[@class="breadcrumb__item"]/a/span/text()').extract()[1:],
 					'tanggal'	: response.xpath('//*[@class="read__time"]/text()').extract_first(),
 					'isi'		: response.xpath('//*[@class="read__content"]/p//text()').extract(),
-					'jumlah_komentar' : response.xpath('//*[@class="total_comment_share"]/text()').extract_first(),
+					'jumlah_sk' : response.xpath('//*[@class="total_comment_share"]/text()').extract_first(),
 					})
 		yield item
