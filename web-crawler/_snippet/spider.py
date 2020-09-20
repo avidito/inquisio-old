@@ -27,17 +27,17 @@ class TemplateSpider(Spider):
 
 	# METHOD INISIASI
 	# Definisikan __init__() untuk mengambil argumen
-	# Gunakan 'situs' dan 'tanggal' sebagai nama argumen
-	def __init__(self, situs="all", tanggal=None):
-		self.situs = situs
+	# Gunakan 'kategori' dan 'tanggal' sebagai nama argumen
+	def __init__(self, kategori="all", tanggal=None):
+		self.kategori = kategori
 		self.tanggal = tanggal
 
 	# METHOD REQUESTS PERTAMA
 	# Definisikan start_requests() untuk praproses dan request URL.
-	# Kombinasikan URL dengan argumen 'situs' dan 'tanggal'.
+	# Kombinasikan URL dengan argumen 'kategori' dan 'tanggal'.
 	def start_requests(self):
 		for url in self.start_urls:
-			absolute_url = url + "/?site=" + self.situs
+			absolute_url = url + "/?site=" + self.kategori
 			if(self.tanggal is not None):
 				absolute_url += "&date=" + self.tanggal
 			

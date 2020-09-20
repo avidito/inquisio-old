@@ -67,6 +67,3 @@ class OkezoneSpider(Spider):
 			yield item
 		else:
 			yield Request(url=url_selanjutnya, meta={'item': item}, callback=self.parse_isi_berita)
-
-
-
