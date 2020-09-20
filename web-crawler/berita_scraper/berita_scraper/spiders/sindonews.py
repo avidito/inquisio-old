@@ -19,8 +19,31 @@ class SindonewsSpider(Spider):
 
 	# METHOD REQUEST PERTAMA
 	def start_requests(self):
-		for url in start_urls:
+		for url in self.start_urls:
 			absolute_url = url + '{kategori}?t={tanggal}'.format(kategori=self.kategori, tanggal=self.tanggal)
 
 			# Request URL
 			yield Request(url=absolute_url, callback=self.parse)
+
+	# METHOD PARSE UTAMA
+	def parse(self, response):
+		# Ekstraksi URL dari artikel dan request ke URL artikel
+		daftar_url_berita = response.xpath('//div[@class="indeks-title"]/a/@href').extract()
+		for url_berita in daftar_url_berita:
+			yield Request(url=url_berita, callback=self.parse_info)
+
+		# Request ke halaman berikutnya
+		# url_halaman_berikutnya = response.xpath('//a[@rel="next"]/@href').extract_first()
+		# yield Request(url=url_halaman_berikutnya, callback=self.parse)
+
+	# METHOD PARSE INFO
+	def parse_info(self, response):
+		item = BeritaScraperItem({
+			'judul'		: response.xpath('//div[@class="article"]/h1/text()').extract_first(),
+			'kategori'	: response.xpath('//ul[@class="breadcrumb"]//li[last()]//a/text()').extract_first(),
+			'tanggal'	: response.xpath('//div[@class="article"]//time/text()').extract_first(),
+			'isi'		: response.xpath('//div[@id="content"]//text()').extract(),
+			'jumlah_sk'	: '0',
+			})
+
+		yield item
