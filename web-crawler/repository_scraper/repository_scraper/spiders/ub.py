@@ -5,12 +5,17 @@ from datetime import datetime
 
 from repository_scraper.items import RepositoryScraperItem
 
+
 class UbSpider(Spider):
     name = 'ub'
     allowed_domains = ['repository.ub.ac.id']
     start_urls = [
     	'http://repository.ub.ac.id',
     	]
+
+    custom_settings = {
+        'ITEM_PIPELINES': {'repository_scraper.pipelines.UbPipeline': 300,},
+    }
 
     # METHOD INISIASI
     def __init__(self, tahun=None):

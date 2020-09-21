@@ -5,6 +5,7 @@ from datetime import datetime
 
 from repository_scraper.items import RepositoryScraperItem
 
+
 class UnairSpider(Spider):
     name = 'unair'
     allowed_domains = ['repository.unair.ac.id']

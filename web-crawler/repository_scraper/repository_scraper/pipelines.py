@@ -66,8 +66,7 @@ class UbPipeline:
 
 		# Judul
 		# Mengecilkan seluruh tulisan dan membersihkan spasi pada tulisan.
-		daftar_kata = item['judul'].lower().split('\r')
-		item['judul'] = ' '.join([kata.strip() for kata in daftar_kata])
+		item['judul'] = " ".join(item['judul'].strip().split()).lower()
 
 		# Tahun
 		# Mengambil bagian tahun saja.
@@ -75,7 +74,17 @@ class UbPipeline:
 
 		# Divisi
 		# Merubah format dan membersihkan spasi pada tulisan.
-		item['divisi'] = ' | '.join([d.strip() for d in item['divisi'].split('>')])
+		# Jika S2/S3
+		divisi = item['divisi'].lower()
+		if(divisi.find("s2 / s3") != -1):
+			departemen, fakultas = divisi.split('>')[1].split(',')
+			fakultas = fakultas[10:]
+			departemen = departemen[10:]
+			item['divisi'] = " | ".join([fakultas, departemen])
+
+		# Selainnya
+		else:
+			item['divisi'] = divisi[9:].replace(">", "|")
 
 		# Abstrak
 		# Jika abstrak tidak ada, isi dengan '-'
@@ -83,8 +92,7 @@ class UbPipeline:
 			item['abstrak'] = '-'
 		# Jika abstrak ada, kecilkan seluruh tulisan dan bersihkan spasi.
 		else:
-			daftar_kalimat = item['abstrak'].lower().split('\r')
-			item['abstrak'] = ' '.join([kalimat.strip() for kalimat in daftar_kalimat])
+			item['abstrak'] = " ".join(item['abstrak'].strip().split()).lower()
 
 		return item
 
