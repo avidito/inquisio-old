@@ -15,28 +15,46 @@ class RepositoryScraperPipeline:
 # UNAIR
 class UnairPipeline:
 	def process_item(self, item, spider):
-		if(spider.name not in ["unair"]):
-			return item
-
 		# Judul
-		# Mengecilkan seluruh tulisan dan membersihkan spasi pada tulisan.
-		item['judul'] = item['judul'].lower().strip()
+		# Menghilangkan \r\n dan mengecilkan seluruh tulisan.
+		item['judul'] = " ".join(item['judul'].strip().split()).lower()
 
 		# Tahun
 		# Mengambil bagian tahun saja.
-		item['tahun'] = item['tahun'].strip()[1:-1]
+		item['tahun'] = item['tahun'].split()[2]
 
 		# Divisi
-		# Membersihkan dan menggabung fakultas dan departemen.
-		divisi = item['divisi'].split('>')
-		divisi[0] = divisi[0][4:].strip()
-		if(len(divisi) > 1):
-			divisi[1] = divisi[1].strip()
-		item['divisi'] = ' | '.join(divisi[:min(2, len(divisi))])
+		# Merubah format dan membersihkan spasi pada tulisan.
+		# Jika Fakultas Vokasi
+		divisi = item['divisi'].lower()
+		if(divisi.find("vokasi") != -1):
+			# Hanya mengambil nama departemen dan prodi
+			departemen, prodi = divisi.split(' > ')[1:]
+			departemen = departemen[11:]
+			prodi = prodi[3:]
+			item['divisi'] = ' | '.join([departemen, prodi])
+		
+		# Selain Fakultas Vokasi
+		else:
+			# Hanya mengambil nama fakultas dan departemen
+			divisi_split = divisi.split(' > ')
+			fakultas = divisi_split[0][13:]
+
+			# Jika departemen dispesifikan
+			if(len(divisi_split) > 1):
+				# Menghapus doktoral / magister
+				departemen = divisi_split[1]
+				if(departemen.find("doktoral") != -1 or departemen.find("magister") != -1):
+					departemen = departemen[9:]
+				item['divisi'] = ' | '.join([fakultas, departemen])
+
+			# Jika hanya fakultas yang dispesifikan
+			else:
+				item['divisi'] = fakultas
 
 		# Abstrak
-		# Mengecilkan seluruh tulisan dan membersihkan spasi.
-		item['abstrak'] = item['abstrak'].lower().strip()
+		# Menghilangkan \r\n dan mengecilkan seluruh tulisan.
+		item['abstrak'] = " ".join(item['abstrak'].strip().split()).lower()
 
 		return item
 

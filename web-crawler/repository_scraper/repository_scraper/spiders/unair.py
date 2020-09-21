@@ -12,6 +12,10 @@ class UnairSpider(Spider):
     	'http://repository.unair.ac.id',
     	]
 
+    custom_settings = {
+        'ITEM_PIPELINES': {'repository_scraper.pipelines.UnairPipeline': 300,},
+    }
+
     # METHOD INISIASI
     def __init__(self, tahun=None):
     	self.tahun = tahun if (tahun is not None) else datetime.now().strftime("%Y")
