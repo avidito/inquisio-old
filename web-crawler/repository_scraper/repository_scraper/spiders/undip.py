@@ -33,4 +33,10 @@ class UndipSpider(Spider):
 
     # METHOD PARSE INFO
     def parse_info(self, response):
-    	pass
+    	item = RepositoryScraperItem({
+    		'judul': response.xpath('//p[@class="ep_block"]/em/text()').extract_first(),
+    		'tahun': response.xpath('//th[text()="Deposited On:"]/following-sibling::td/text()').extract_first(),
+    		'divisi': response.xpath('//th[text()="Divisions:"]/parent::tr//a/text()').extract_first(),
+    		'abstrak': response.xpath('//h2[text()="Abstract"]/following-sibling::p/text()').extract_first(),
+    		})
+    	yield item
