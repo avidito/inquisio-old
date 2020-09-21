@@ -61,9 +61,6 @@ class UnairPipeline:
 # UB
 class UbPipeline:
 	def process_item(self, item, spider):
-		if(spider.name not in ['ub']):
-			return item
-
 		# Judul
 		# Mengecilkan seluruh tulisan dan membersihkan spasi pada tulisan.
 		item['judul'] = " ".join(item['judul'].strip().split()).lower()
@@ -96,15 +93,13 @@ class UbPipeline:
 
 		return item
 
-# Undip
+# UNDIP
 class UndipPipeline:
 	def process_item(self, item, spider):
-		if(spider.name not in ['undip']):
-			return item
-
 		# Judul
 		# Mengecilkan tulisan dan menghapus unprintable characters.
-		item['judul'] = item['judul'].lower().encode("ascii", "ignore").decode()
+		bersih = item['judul'].encode("ascii", "ignore").decode()
+		item['judul'] = " ".join(bersih.strip().lower().split())
 
 		# Tahun
 		# Mengambil bagian tahun saja.
@@ -114,17 +109,29 @@ class UndipPipeline:
 		# Jika divisi tidak ada, isi dengan '-'
 		if (item['divisi'] is None):
 			item['divisi'] = '-'
-		# Jika divisi ada, ubah tanda pemisah.
+		
+		# Jika divisi ada.
 		else:
-			item['divisi'] = item['divisi'].replace('>', '|')
+			divisi = item['divisi'].lower()
+
+			# Jika Postgraduate
+			if(divisi.find("postgraduate") != -1):
+				item['divisi'] = divisi.split(" > ")[1][18:]
+
+			# Selainnya
+			else:
+				fakultas, departemen = divisi.split(" > ")
+				fakultas = fakultas[11:]
+				departemen = departemen[14:]
+				item['divisi'] = ' | '.join([fakultas, departemen]) 
 
 		# Abstrak
 		# Jika abstrak tidak ada, isi dengan '-'
 		if (item['abstrak'] is None):
 			item['abstrak'] = '-'
+
 		# Jika abstrak ada, kecilkan seluruh tulisan dan bersihkan spasi.
 		else:
-			daftar_kalimat = item['abstrak'].lower().split('\r')
-			item['abstrak'] = ' '.join([kalimat.strip() for kalimat in daftar_kalimat])
+			item['abstrak'] = " ".join(item['abstrak'].strip().split()).lower()
 
 		return item

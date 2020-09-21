@@ -13,6 +13,10 @@ class UndipSpider(Spider):
     	'http://eprints.undip.ac.id',
     	]
 
+    custom_settings = {
+        'ITEM_PIPELINES': {'repository_scraper.pipelines.UndipPipeline': 300,},
+    }
+
     # METHOD INISIASI
     def __init__(self, tahun=None):
     	self.tahun = tahun if (tahun is not None) else datetime.now().strftime("%Y")
