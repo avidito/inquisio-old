@@ -15,41 +15,55 @@ class RepositoryScraperPipeline:
 # UNAIR
 class UnairPipeline:
 	def process_item(self, item, spider):
-		if(spider.name not in ["unair"]):
-			return item
-
 		# Judul
-		# Mengecilkan seluruh tulisan dan membersihkan spasi pada tulisan.
-		item['judul'] = item['judul'].lower().strip()
+		# Menghilangkan \r\n dan mengecilkan seluruh tulisan.
+		item['judul'] = " ".join(item['judul'].strip().split()).lower()
 
 		# Tahun
 		# Mengambil bagian tahun saja.
-		item['tahun'] = item['tahun'].strip()[1:-1]
+		item['tahun'] = item['tahun'].split()[2]
 
 		# Divisi
-		# Membersihkan dan menggabung fakultas dan departemen.
-		divisi = item['divisi'].split('>')
-		divisi[0] = divisi[0][4:].strip()
-		if(len(divisi) > 1):
-			divisi[1] = divisi[1].strip()
-		item['divisi'] = ' | '.join(divisi[:min(2, len(divisi))])
+		# Merubah format dan membersihkan spasi pada tulisan.
+		# Jika Fakultas Vokasi
+		divisi = item['divisi'].lower()
+		if(divisi.find("vokasi") != -1):
+			# Hanya mengambil nama departemen dan prodi
+			departemen, prodi = divisi.split(' > ')[1:]
+			departemen = departemen[11:]
+			prodi = prodi[3:]
+			item['divisi'] = ' | '.join([departemen, prodi])
+		
+		# Selain Fakultas Vokasi
+		else:
+			# Hanya mengambil nama fakultas dan departemen
+			divisi_split = divisi.split(' > ')
+			fakultas = divisi_split[0][13:]
+
+			# Jika departemen dispesifikan
+			if(len(divisi_split) > 1):
+				# Menghapus doktoral / magister
+				departemen = divisi_split[1]
+				if(departemen.find("doktoral") != -1 or departemen.find("magister") != -1):
+					departemen = departemen[9:]
+				item['divisi'] = ' | '.join([fakultas, departemen])
+
+			# Jika hanya fakultas yang dispesifikan
+			else:
+				item['divisi'] = fakultas
 
 		# Abstrak
-		# Mengecilkan seluruh tulisan dan membersihkan spasi.
-		item['abstrak'] = item['abstrak'].lower().strip()
+		# Menghilangkan \r\n dan mengecilkan seluruh tulisan.
+		item['abstrak'] = " ".join(item['abstrak'].strip().split()).lower()
 
 		return item
 
 # UB
 class UbPipeline:
 	def process_item(self, item, spider):
-		if(spider.name not in ['ub']):
-			return item
-
 		# Judul
 		# Mengecilkan seluruh tulisan dan membersihkan spasi pada tulisan.
-		daftar_kata = item['judul'].lower().split('\r')
-		item['judul'] = ' '.join([kata.strip() for kata in daftar_kata])
+		item['judul'] = " ".join(item['judul'].strip().split()).lower()
 
 		# Tahun
 		# Mengambil bagian tahun saja.
@@ -57,7 +71,17 @@ class UbPipeline:
 
 		# Divisi
 		# Merubah format dan membersihkan spasi pada tulisan.
-		item['divisi'] = ' | '.join([d.strip() for d in item['divisi'].split('>')])
+		# Jika S2/S3
+		divisi = item['divisi'].lower()
+		if(divisi.find("s2 / s3") != -1):
+			departemen, fakultas = divisi.split('>')[1].split(',')
+			fakultas = fakultas[10:]
+			departemen = departemen[10:]
+			item['divisi'] = " | ".join([fakultas, departemen])
+
+		# Selainnya
+		else:
+			item['divisi'] = divisi[9:].replace(">", "|")
 
 		# Abstrak
 		# Jika abstrak tidak ada, isi dengan '-'
@@ -65,20 +89,17 @@ class UbPipeline:
 			item['abstrak'] = '-'
 		# Jika abstrak ada, kecilkan seluruh tulisan dan bersihkan spasi.
 		else:
-			daftar_kalimat = item['abstrak'].lower().split('\r')
-			item['abstrak'] = ' '.join([kalimat.strip() for kalimat in daftar_kalimat])
+			item['abstrak'] = " ".join(item['abstrak'].strip().split()).lower()
 
 		return item
 
-# Undip
+# UNDIP
 class UndipPipeline:
 	def process_item(self, item, spider):
-		if(spider.name not in ['undip']):
-			return item
-
 		# Judul
 		# Mengecilkan tulisan dan menghapus unprintable characters.
-		item['judul'] = item['judul'].lower().encode("ascii", "ignore").decode()
+		bersih = item['judul'].encode("ascii", "ignore").decode()
+		item['judul'] = " ".join(bersih.strip().lower().split())
 
 		# Tahun
 		# Mengambil bagian tahun saja.
@@ -88,17 +109,29 @@ class UndipPipeline:
 		# Jika divisi tidak ada, isi dengan '-'
 		if (item['divisi'] is None):
 			item['divisi'] = '-'
-		# Jika divisi ada, ubah tanda pemisah.
+		
+		# Jika divisi ada.
 		else:
-			item['divisi'] = item['divisi'].replace('>', '|')
+			divisi = item['divisi'].lower()
+
+			# Jika Postgraduate
+			if(divisi.find("postgraduate") != -1):
+				item['divisi'] = divisi.split(" > ")[1][18:]
+
+			# Selainnya
+			else:
+				fakultas, departemen = divisi.split(" > ")
+				fakultas = fakultas[11:]
+				departemen = departemen[14:]
+				item['divisi'] = ' | '.join([fakultas, departemen]) 
 
 		# Abstrak
 		# Jika abstrak tidak ada, isi dengan '-'
 		if (item['abstrak'] is None):
 			item['abstrak'] = '-'
+
 		# Jika abstrak ada, kecilkan seluruh tulisan dan bersihkan spasi.
 		else:
-			daftar_kalimat = item['abstrak'].lower().split('\r')
-			item['abstrak'] = ' '.join([kalimat.strip() for kalimat in daftar_kalimat])
+			item['abstrak'] = " ".join(item['abstrak'].strip().split()).lower()
 
 		return item

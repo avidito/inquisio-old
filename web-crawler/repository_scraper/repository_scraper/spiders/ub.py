@@ -5,12 +5,17 @@ from datetime import datetime
 
 from repository_scraper.items import RepositoryScraperItem
 
+
 class UbSpider(Spider):
     name = 'ub'
     allowed_domains = ['repository.ub.ac.id']
     start_urls = [
     	'http://repository.ub.ac.id',
     	]
+
+    custom_settings = {
+        'ITEM_PIPELINES': {'repository_scraper.pipelines.UbPipeline': 300,},
+    }
 
     # METHOD INISIASI
     def __init__(self, tahun=None):
@@ -32,12 +37,11 @@ class UbSpider(Spider):
 
     # METHOD PARSE INFO
     def parse_info(self, response):
-    	ringkasan = response.xpath('//p[@style="margin-bottom: 1em"]')
     	item = RepositoryScraperItem({
-    		'judul': ringkasan.xpath('./em/text()').extract_first(),
-    		'tahun': ringkasan.xpath('./text()[2]').extract_first(),
-    		'divisi': response.xpath('//th[text()="Divisions:"]/parent::tr//a/text()').extract_first(),
-    		'abstrak': response.xpath('//h2[text()="Indonesian Abstract"]/following-sibling::p[1]/text()').extract_first(),
+        		'judul': response.xpath('//em/text()').extract_first(),
+        		'tahun': response.xpath('//span[@class="person_name" and last()]/following::text()').extract_first(),
+        		'divisi': response.xpath('//th[text()="Divisions:"]/following::td/a/text()').extract_first(),
+        		'abstrak': response.xpath('//h2[text()="Indonesian Abstract"]/following::p/text()').extract_first(),
     		})
     	yield item
 

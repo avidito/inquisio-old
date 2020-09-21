@@ -5,12 +5,17 @@ from datetime import datetime
 
 from repository_scraper.items import RepositoryScraperItem
 
+
 class UnairSpider(Spider):
     name = 'unair'
     allowed_domains = ['repository.unair.ac.id']
     start_urls = [
     	'http://repository.unair.ac.id',
     	]
+
+    custom_settings = {
+        'ITEM_PIPELINES': {'repository_scraper.pipelines.UnairPipeline': 300,},
+    }
 
     # METHOD INISIASI
     def __init__(self, tahun=None):
@@ -32,11 +37,10 @@ class UnairSpider(Spider):
 
     # METHOD PARSE INFO
     def parse_info(self, response):
-        ringkasan = response.xpath('//p[@style="margin-bottom: 1em"]')
         item = RepositoryScraperItem({
-                'judul': ringkasan.xpath('./em/text()').extract_first(),
-                'tahun': ringkasan.xpath('./text()[2]').extract_first(),
-                'divisi': response.xpath('//th[text()="Divisions:"]/parent::tr//a/text()').extract_first(),
-                'abstrak': response.xpath('//h2[text()="Abstract"]/following-sibling::p/text()').extract_first(),
+                'judul': response.xpath('//em/text()').extract_first(),
+                'tahun': response.xpath('//th[text()="Date Deposited:"]/following::td/text()').extract_first(),
+                'divisi': response.xpath('//th[text()="Divisions:"]/following::td//text()').extract_first(),
+                'abstrak': response.xpath('//h2/following::p/text()').extract_first(),
             })
         yield item
