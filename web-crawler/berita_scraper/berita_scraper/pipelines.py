@@ -131,17 +131,29 @@ class SindonewsPipeline:
 		item['tanggal'] = ' '.join(item['tanggal'].split(' ')[1:4])
 
 		# Isi
-		# Menggabungkan seluruh bagian teks menjadi utuh
-		iklan_idx = [idx for (idx, val) in enumerate(item['isi']) if 'Baca Juga' in val or 'Baca juga' in val or val.startswith(' (Baca:')]
-		for i in range(len(iklan_idx)-1, -1, -1):
-			del item['isi'][iklan_idx[i]+3]
-			del item['isi'][iklan_idx[i]+2]
-			del item['isi'][iklan_idx[i]+1]
-			del item['isi'][iklan_idx[i]]
+		# Mencari lokasi referensi artikel lain
+		isi = [kata.lower() for kata in item['isi']]
+		iklan_idx_satu = []
+		iklan_idx_dua = []
+		for idx, val in enumerate(isi):
+			if val.startswith('(baca') or val.startswith(' (baca'):
+				iklan_idx_satu.append(idx)
+			elif val.endswith('('):
+				iklan_idx_dua.append(idx)
 
-		isi = [kata[:-1] if kata[-1]== "(" else kata for kata in item['isi']]
+		# Menghapus referensi artikel lain
+		if iklan_idx_satu:
+			for i in range(len(iklan_idx_satu)-1, -1,-1):
+				del item['isi'][iklan_idx_satu[i]]
+		elif iklan_idx_dua:
+			for i in range(len(iklan_idx_dua)-1, -1,-1):
+				del item['isi'][iklan_idx_dua[i]+2]
+				del item['isi'][iklan_idx_dua[i]+1]
+				del item['isi'][iklan_idx_dua[i]]
+
+		
 		# Menggabungkan seluruh bagian teks menjadi utuh
-		item['isi'] = ''.join([kata for kata in item['isi'][:-2]])
+		item['isi'] = ''.join([kata for kata in item['isi']])
 
 
 		# Jumlah Komentar

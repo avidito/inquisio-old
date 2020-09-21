@@ -12,7 +12,7 @@ class SindonewsSpider(Spider):
 		]
 
 	# METHOD INISIASI
-	def __init__(self, kategori='0', tanggal=None):
+	def __init__(self, kategori='5', tanggal=None):
 		self.kategori = kategori
 		self.tanggal = tanggal if tanggal is not None else datetime.now().strftime("%Y-%m-%d")
 
@@ -30,11 +30,12 @@ class SindonewsSpider(Spider):
 		# Ekstraksi URL dari artikel dan request ke URL artikel
 		daftar_url_berita = response.xpath('//div[@class="indeks-title"]/a/@href').extract()
 		for url_berita in daftar_url_berita:
-			yield Request(url=url_berita, callback=self.parse_info)
+			absolute_url_berita = url_berita + "?showpage=all"
+			yield Request(url=absolute_url_berita, callback=self.parse_info)
 
 		# Request ke halaman berikutnya
-		# url_halaman_berikutnya = response.xpath('//a[@rel="next"]/@href').extract_first()
-		# yield Request(url=url_halaman_berikutnya, callback=self.parse)
+		url_halaman_berikutnya = response.xpath('//a[@rel="next"]/@href').extract_first()
+		yield Request(url=url_halaman_berikutnya, callback=self.parse)
 
 	# METHOD PARSE INFO
 	def parse_info(self, response):
@@ -42,7 +43,7 @@ class SindonewsSpider(Spider):
 			'judul'		: response.xpath('//div[@class="article"]/h1/text()').extract_first(),
 			'kategori'	: response.xpath('//ul[@class="breadcrumb"]//li[last()]//a/text()').extract_first(),
 			'tanggal'	: response.xpath('//div[@class="article"]//time/text()').extract_first(),
-			'isi'		: response.xpath('//div[@id="content"]//text()[not(ancestor::div[contains(@class,"ads300") or contains(@class,"baca-inline")])]').extract(),
+			'isi'		: response.xpath('//div[@id="content"]//text()[not(ancestor::div[contains(@class, "ads300") or contains(@class, "baca-inline") or contains(@class, "editor")])]').extract(),
 			'jumlah_sk'	: '0',
 			})
 
