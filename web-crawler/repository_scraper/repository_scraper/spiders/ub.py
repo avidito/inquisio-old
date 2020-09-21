@@ -32,6 +32,13 @@ class UbSpider(Spider):
 
     # METHOD PARSE INFO
     def parse_info(self, response):
-    	pass
+    	ringkasan = response.xpath('//p[@style="margin-bottom: 1em"]')
+    	item = RepositoryScraperItem({
+    		'judul': ringkasan.xpath('./em/text()').extract_first(),
+    		'tahun': ringkasan.xpath('./text()[2]').extract_first(),
+    		'divisi': response.xpath('//th[text()="Divisions:"]/parent::tr//a/text()').extract_first(),
+    		'abstrak': response.xpath('//h2[text()="Indonesian Abstract"]/following-sibling::p[1]/text()').extract_first(),
+    		})
+    	yield item
 
 
