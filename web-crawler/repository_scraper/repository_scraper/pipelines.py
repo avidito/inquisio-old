@@ -19,7 +19,7 @@ class UnairPipeline:
 			return item
 
 		# Judul
-		# Mengecilkan seluruh tulisan dan membersihkan spasi.
+		# Mengecilkan seluruh tulisan dan membersihkan spasi pada tulisan.
 		item['judul'] = item['judul'].lower().strip()
 
 		# Tahun
@@ -37,5 +37,35 @@ class UnairPipeline:
 		# Abstrak
 		# Mengecilkan seluruh tulisan dan membersihkan spasi.
 		item['abstrak'] = item['abstrak'].lower().strip()
+
+		return item
+
+# UB
+class UbPipeline:
+	def process_item(self, item, spider):
+		if(spider.name not in ['ub']):
+			return item
+
+		# Judul
+		# Mengecilkan seluruh tulisan dan membersihkan spasi pada tulisan.
+		daftar_kata = item['judul'].lower().split('\r')
+		item['judul'] = ' '.join([kata.strip() for kata in daftar_kata])
+
+		# Tahun
+		# Mengambil bagian tahun saja.
+		item['tahun'] = item['tahun'].strip()[1:-1]
+
+		# Divisi
+		# Merubah format dan membersihkan spasi pada tulisan.
+		item['divisi'] = ' | '.join([d.strip() for d in item['divisi'].split('>')])
+
+		# Abstrak
+		# Jika abstrak tidak ada, isi dengan '-'
+		if (item['abstrak'] is None):
+			item['abstrak'] = '-'
+		# Jika abstrak ada, kecilkan seluruh tulisan dan bersihkan spasi.
+		else:
+			daftar_kalimat = item['abstrak'].lower().split('\r')
+			item['abstrak'] = ' '.join([kalimat.strip() for kalimat in daftar_kalimat])
 
 		return item
