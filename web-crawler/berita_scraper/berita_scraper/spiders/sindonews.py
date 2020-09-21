@@ -42,7 +42,7 @@ class SindonewsSpider(Spider):
 			'judul'		: response.xpath('//div[@class="article"]/h1/text()').extract_first(),
 			'kategori'	: response.xpath('//ul[@class="breadcrumb"]//li[last()]//a/text()').extract_first(),
 			'tanggal'	: response.xpath('//div[@class="article"]//time/text()').extract_first(),
-			'isi'		: response.xpath('//div[@id="content"]//text()').extract(),
+			'isi'		: response.xpath('//div[@id="content"]//text()[not(ancestor::div[contains(@class,"ads300") or contains(@class,"baca-inline")])]').extract(),
 			'jumlah_sk'	: '0',
 			})
 

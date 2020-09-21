@@ -115,3 +115,37 @@ class DetikPipeline:
 		item['jumlah_sk'] = int(item['jumlah_sk'].split(' ')[0])
 
 		return item
+
+# Sindonews
+class SindonewsPipeline:
+	def process_item(self, item, spider):
+		if spider.name not in ['sindonews']:
+			return item
+
+		# Judul
+		# Mengecilkan seluruh tulisan
+		item['judul'] = item['judul'].lower()
+
+		# Tanggal
+		# Mengambil bagian tanggal saja
+		item['tanggal'] = ' '.join(item['tanggal'].split(' ')[1:4])
+
+		# Isi
+		# Menggabungkan seluruh bagian teks menjadi utuh
+		iklan_idx = [idx for (idx, val) in enumerate(item['isi']) if 'Baca Juga' in val or 'Baca juga' in val or val.startswith(' (Baca:')]
+		for i in range(len(iklan_idx)-1, -1, -1):
+			del item['isi'][iklan_idx[i]+3]
+			del item['isi'][iklan_idx[i]+2]
+			del item['isi'][iklan_idx[i]+1]
+			del item['isi'][iklan_idx[i]]
+
+		isi = [kata[:-1] if kata[-1]== "(" else kata for kata in item['isi']]
+		# Menggabungkan seluruh bagian teks menjadi utuh
+		item['isi'] = ''.join([kata for kata in item['isi'][:-2]])
+
+
+		# Jumlah Komentar
+		# Mengambil angka yang merupakan jumlah komentar
+		item['jumlah_sk'] = int(item['jumlah_sk'])
+
+		return item
