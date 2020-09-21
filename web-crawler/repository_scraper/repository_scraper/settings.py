@@ -65,6 +65,7 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 5
 ITEM_PIPELINES = {
    'repository_scraper.pipelines.UnairPipeline': 300,
    'repository_scraper.pipelines.UbPipeline': 301,
+   'repository_scraper.pipelines.UndipPipeline': 302,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
