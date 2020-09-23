@@ -12,6 +12,10 @@ class KompasSpider(Spider):
 		'https://indeks.kompas.com',
 		]
 
+	custom_settings = {
+		'ITEM_PIPELINES': {'berita_scraper.pipelines.KompasPipeline': 300,}
+	}
+
 	# METHOD INISIASI
 	def __init__(self, kategori="all", tanggal=None):
 		self.kategori = kategori
@@ -20,7 +24,7 @@ class KompasSpider(Spider):
 	# METHOD REQUEST PERTAMA
 	def start_requests(self):
 		for url in self.start_urls:
-			absolute_url = url + "/?site={}&date={}".format(k=self.kategori, t=self.tanggal)
+			absolute_url = url + "/?site={k}&date={t}".format(k=self.kategori, t=self.tanggal)
 			
 			# Request URL
 			yield Request(url=absolute_url, callback=self.parse)
@@ -35,16 +39,16 @@ class KompasSpider(Spider):
 
 		# Request ke halaman berikutnya
 		url_halaman_berikutnya = response.xpath('//a[@rel="next"]/@href').extract_first()
-		absolute_url_halaman_berikutnya = response.urljoin(url_halaman_berikutnya)
+		absolute_url_halaman_berikutnya = url_halaman_berikutnya
 		yield Request(url=absolute_url_halaman_berikutnya, callback=self.parse)
 
 	# METHOD PARSE INFO
 	def parse_info(self, response):
+		judul 	  = response.xpath('//h1[@class="read__title"]/text()').extract_first()
+		kategori  = response.xpath('//li[@class="tag__article__item"]//text()').extract()
+		tanggal   = response.xpath('//div[@class="read__time"]/text()').extract_first()
+		isi 	  = response.xpath('//div[@class="read__content"]/*[self::p or self::ul/li]//text()').extract()
+		jumlah_sk = response.xpath('//div[@class="total_comment_share"]/text()').extract_first()
 		item = BeritaScraperItem({
-					'judul'		: response.xpath('//h1[@class="read__title"]/text()').extract_first(),
-					'kategori'	: response.xpath('//li[@class="breadcrumb__item"]/a/span/text()').extract()[1:],
-					'tanggal'	: response.xpath('//div[@class="read__time"]/text()').extract_first(),
-					'isi'		: response.xpath('//div[@class="read__content"]/p//text()').extract(),
-					'jumlah_sk'	: response.xpath('//div[@class="total_comment_share"]/text()').extract_first(),
-					})
+				'judul': judul, 'kategori': kategori, 'tanggal': tanggal, 'isi': isi, 'jumlah_sk': jumlah_sk})
 		yield item

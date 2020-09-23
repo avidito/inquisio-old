@@ -19,37 +19,45 @@ class KompasPipeline:
 			return item
 
 		# Judul
-		# Mengecilkan seluruh tulisan
-		item['judul'] = item['judul'].lower()
+		# Mengecilkan seluruh tulisan dan membersihkan spasi
+		item['judul'] = item['judul'].lower().strip()
 
 		# Kategori
-		# Menggabungkan kategori dan sub kategori dengan '|'
-		item['kategori'] = ' | '.join(item['kategori'])
+		# Menggabungkan seluruh kategori dengan '|'
+		daftar_kategori = [kategori.lower() for kategori in item['kategori']]
+		item['kategori'] = ' | '.join(daftar_kategori)
 
 		# Tanggal
 		# Mengambil bagian tanggal saja
 		item['tanggal'] = item['tanggal'].split(' - ')[1].split(',')[0] 
 		
 		# Jumlah Komentar
-		# Mengambil bagian angka saja
-		if (item['jumlah_sk'] is not None):
-			item['jumlah_sk'] = item['jumlah_sk'][1:-1]
-		
-		# Memberikan nilai 0 jika tidak ada komentar
-		else:
-			item['jumlah_sk'] = 0
+		# Mengambil bagian angka saja (berikan nilai 0 jika None)
+		item['jumlah_sk'] = item['jumlah_sk'][1:-1] if (item['jumlah_sk'] is not None) else 0
 
 		# Isi.
-		# Menghilangkan iklan atau referensi ke artikel lain
-		iklan_idx = [idx for (idx, val) in enumerate(item['isi']) if val.startswith('Baca juga')]
-		for i in range(len(iklan_idx)-1, -1, -1):
-			del item['isi'][iklan_idx[i]+1]
-			del item['isi'][iklan_idx[i]]
+		# Mengecilkan seluruh potongan tulisan
+		isi = [potongan.lower() for potongan in item['isi']]
 
-		# Menggabungkan seluruh bagian teks menjadi bagian yang utuh
-		for idx in range(len(item['isi'])):
-			item['isi'][idx] = item['isi'][idx].strip()
-		item['isi'] = ' '.join(item['isi'])
+		# Menghilangkan iklan atau referensi ke artikel lain
+		iklan_idx = [idx for (idx, val) in enumerate(isi) if val.startswith('baca juga')]
+		for i in range(len(iklan_idx)-1, -1, -1):
+			del isi[iklan_idx[i]+1]
+			del isi[iklan_idx[i]]
+
+		# Menggabungkan seluruh bagian teks dan membersihkan spasi berlebih
+		isi = ' '.join((' '.join(isi)).strip().split())
+
+		# Menghapus publisher
+		strip = isi.find('-')
+		endash = isi.find(b'\xe2\x80\x93'.decode('utf-8'))
+		if(strip == -1):
+			pub = endash
+		elif(endash != -1):
+			pub = min(strip, endash)
+		else:
+			pub = strip
+		item['isi'] = isi[pub+1:].lstrip()
 
 		return item
 
