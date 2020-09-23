@@ -7,6 +7,11 @@
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 
+# Daftar Bulan
+DAFTAR_BULAN = {
+	'Januari':'01', 'Februari':'02', 'Maret':'03', 'April':'4', 'Mei':'5', 'Juni':'6', 'Juli':'7',
+	'Agustus':'08', 'September':'09', 'Oktober':'10', 'November':'11', 'Desember':'12',
+	}
 
 class BeritaScraperPipeline:
     def process_item(self, item, spider):
@@ -67,29 +72,33 @@ class OkezonePipeline:
 		item['judul'] = ' '.join(daftar_potongan)
 
 		# Kategori
-		# Menggabungkan kategori dan sub kategori dengan '|'
+		# Menggabungkan semua kategori dengan '|' dan menghapus '#'
 		daftar_kategori = [kategori.lower().strip() for kategori in item['kategori']]
-		item['kategori'] = ' | '.join(daftar_kategori)
+		item['kategori'] = ' | '.join(daftar_kategori).replace('#', '')
 
 		# Tanggal
 		# Mengambil bagian tanggal saja
-		item['tanggal'] = ' '.join(item['tanggal'].split(' ')[1:4]) 
+		tanggal = item['tanggal'].split(' ')[1:4]
+
+		# Konversi format tanggal menjadi angka
+		bulan = DAFTAR_BULAN[tanggal[1]]
+		item['tanggal'] = '{thn}/{bln}/{tgl}'.format(thn=tanggal[2], bln=bulan, tgl=tanggal[0])
 		
 		# Jumlah Komentar
 		# Mengonversi menjadi angka
 		item['jumlah_sk'] = int(item['jumlah_sk'])
 
-		# Isi.
-		# Menghilangkan iklan atau referensi ke artikel lain
-		iklan_idx = [idx for (idx, val) in enumerate(item['isi']) if val.startswith('Baca juga')]
-		for i in range(len(iklan_idx)-1, -1, -1):
-			del item['isi'][iklan_idx[i]+1]
-			del item['isi'][iklan_idx[i]]
+		# # Isi.
+		# # Menghilangkan iklan atau referensi ke artikel lain
+		# iklan_idx = [idx for (idx, val) in enumerate(item['isi']) if val.startswith('Baca juga')]
+		# for i in range(len(iklan_idx)-1, -1, -1):
+		# 	del item['isi'][iklan_idx[i]+1]
+		# 	del item['isi'][iklan_idx[i]]
 
-		# Menggabungkan seluruh bagian teks menjadi bagian yang utuh
-		for idx in range(len(item['isi'])):
-			item['isi'][idx] = item['isi'][idx].strip()
-		item['isi'] = ' '.join(item['isi'])
+		# # Menggabungkan seluruh bagian teks menjadi bagian yang utuh
+		# for idx in range(len(item['isi'])):
+		# 	item['isi'][idx] = item['isi'][idx].strip()
+		# item['isi'] = ' '.join(item['isi'])
 		
 		return item
 
