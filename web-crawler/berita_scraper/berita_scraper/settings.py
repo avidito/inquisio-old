@@ -62,10 +62,9 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 5
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {
-   'berita_scraper.pipelines.OkezonePipeline': 301,
-   'berita_scraper.pipelines.DetikPipeline': 302,
-}
+# ITEM_PIPELINES = {
+#    'berita_scraper.pipelines.BeritaScraperPipeline': 300,
+# }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

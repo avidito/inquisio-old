@@ -15,9 +15,6 @@ class BeritaScraperPipeline:
 # Kompas
 class KompasPipeline:
 	def process_item(self, item, spider):
-		if spider.name not in ['kompas']:
-			return item
-
 		# Judul
 		# Mengecilkan seluruh tulisan dan membersihkan spasi
 		item['judul'] = item['judul'].lower().strip()
@@ -64,16 +61,15 @@ class KompasPipeline:
 # Okezone
 class OkezonePipeline:
 	def process_item(self, item, spider):
-		if spider.name not in ['okezone']:
-			return item
-
 		# Judul
 		# Menggabungkan seluruh bagian judul
-		judul = ' '.join([kata.strip() for kata in item['judul']])
+		daftar_potongan = [potongan.lower().strip() for potongan in item['judul']]
+		item['judul'] = ' '.join(daftar_potongan)
 
 		# Kategori
 		# Menggabungkan kategori dan sub kategori dengan '|'
-		item['kategori'] = ' | '.join(item['kategori'])
+		daftar_kategori = [kategori.lower().strip() for kategori in item['kategori']]
+		item['kategori'] = ' | '.join(daftar_kategori)
 
 		# Tanggal
 		# Mengambil bagian tanggal saja

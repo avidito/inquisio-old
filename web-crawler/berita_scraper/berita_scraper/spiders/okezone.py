@@ -12,6 +12,10 @@ class OkezoneSpider(Spider):
 		'http://index.okezone.com',
 	]
 
+	custom_settings = {
+		'ITEM_PIPELINES': {'berita_scraper.pipelines.OkezonePipeline': 300,}
+	}
+
 	# METHOD INISIASI
 	def __init__(self, kategori="1", tanggal=None):
 		self.kategori = kategori
@@ -40,17 +44,18 @@ class OkezoneSpider(Spider):
 	
 	# METHOD PARSE INFO
 	def parse_info(self, response):
+		judul 	  = response.xpath('//h1//text()').extract()
+		kategori  = response.xpath('//a[@class="ga_Tag"]/text()').extract()
+		tanggal   = response.xpath('//div[@class="namerep"]/b/text()').extract_first()
+		isi 	  = response.xpath('//div[@id="contentx"]/p//text()').extract()
+		jumlah_sk = response.xpath('//li[@class="totshare"]/a/span/text()').extract_first()
 		item = BeritaScraperItem({
-					'judul'		: response.xpath('//div[@class="title"]/h1//text()').extract(),
-					'kategori'	: response.xpath('//div[@class="breadcrumb"]/ul//li//text()').extract()[1:],
-					'tanggal'	: response.xpath('//div[@class="namerep"]/b/text()').extract_first(),
-					'isi' 		: response.xpath('//div[@id="contentx"]/p//text()').extract(),
-					'jumlah_sk' : response.xpath('//li[@class="totshare"]/a/span/text()').extract_first(),
-					})
+				'judul': judul, 'kategori': kategori, 'tanggal': tanggal,'isi': isi,'jumlah_sk': jumlah_sk,
+				})
 
 		# Menambahkan isi pada halaman berbeda (jika ada)
 		url_selanjutnya = response.xpath('//span[text()="Selanjutnya"]/parent::a/@href').extract_first()
-		if (url_selanjutnya is None):
+		if (url_selanjutnya is None or url_selanjutnya == '#'):
 			yield item
 		else:
 			yield Request(url=url_selanjutnya, meta={'item': item}, callback=self.parse_isi_berita)
@@ -63,7 +68,7 @@ class OkezoneSpider(Spider):
 
 		# Jika masih ada halaman lagi
 		url_selanjutnya = response.xpath('//span[text()="Selanjutnya"]/parent::a/@href').extract_first()
-		if (url_selanjutnya is None):
+		if (url_selanjutnya is None or url_selanjutnya == '#'):
 			yield item
 		else:
 			yield Request(url=url_selanjutnya, meta={'item': item}, callback=self.parse_isi_berita)
