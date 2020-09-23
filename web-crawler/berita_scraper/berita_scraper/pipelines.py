@@ -88,18 +88,29 @@ class OkezonePipeline:
 		# Mengonversi menjadi angka
 		item['jumlah_sk'] = int(item['jumlah_sk'])
 
-		# # Isi.
-		# # Menghilangkan iklan atau referensi ke artikel lain
-		# iklan_idx = [idx for (idx, val) in enumerate(item['isi']) if val.startswith('Baca juga')]
-		# for i in range(len(iklan_idx)-1, -1, -1):
-		# 	del item['isi'][iklan_idx[i]+1]
-		# 	del item['isi'][iklan_idx[i]]
+		# Isi.
+		# Menghilangkan penulis
+		isi = [potongan.lower() for potongan in item['isi'][:-1]]
 
-		# # Menggabungkan seluruh bagian teks menjadi bagian yang utuh
-		# for idx in range(len(item['isi'])):
-		# 	item['isi'][idx] = item['isi'][idx].strip()
-		# item['isi'] = ' '.join(item['isi'])
+		# Menghilangkan link "Baca Juga"
+		iklan_idx = [idx for (idx, val) in enumerate(isi) if val.startswith('baca juga')]
+		for i in range(len(iklan_idx)-1, -1, -1):
+			del isi[iklan_idx[i]]
 		
+		# Menggabung seluruh potongan dan membersihkan spasi
+		isi = ' '.join((' '.join(isi)).split())
+		
+		# Menghapus publisher
+		strip = isi.find('-')
+		endash = isi.find(b'\xe2\x80\x93'.decode('utf-8'))
+		if(strip == -1):
+			pub = endash
+		elif(endash != -1):
+			pub = min(strip, endash)
+		else:
+			pub = strip
+		item['isi'] = isi[pub+1:].lstrip()
+
 		return item
 
 # Detik
