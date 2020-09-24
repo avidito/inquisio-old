@@ -47,7 +47,7 @@ class OkezoneSpider(Spider):
 		judul 	  = response.xpath('//h1//text()').extract()
 		kategori  = response.xpath('//a[@class="ga_Tag"]/text()').extract()
 		tanggal   = response.xpath('//div[@class="namerep"]/b/text()').extract_first()
-		isi 	  = response.xpath('//div[@id="contentx"]/p//text()[not(parent::a[contains(@class, "reaking")])]').extract()
+		isi 	  = response.xpath('//div[@id="contentx"]/p//text()[following::div[@style="display:none;"] and not(ancestor::a/ancestor::p[preceding::p[position()=1 or position()=2][contains(.//text(), "aca")]])]').extract()
 		jumlah_sk = response.xpath('//li[@class="totshare"]/a/span/text()').extract_first()
 		item = BeritaScraperItem({
 				'judul': judul, 'kategori': kategori, 'tanggal': tanggal,'isi': isi,'jumlah_sk': jumlah_sk,
@@ -63,7 +63,7 @@ class OkezoneSpider(Spider):
 	# METHOD PARSE ISI BERITA DENGAN BANYAK HALAMAN
 	def parse_isi_berita(self, response):
 		item = response.meta['item']
-		tambahan = response.xpath('//div[@id="contentx"]/p//text()').extract()
+		tambahan = response.xpath('//div[@id="contentx"]/p//text()[following::div[@style="display:none;"] and not(ancestor::a/ancestor::p[preceding::p[position()=1 or position()=2][contains(.//text(), "aca")]])]').extract()
 		item['isi'].extend(tambahan)
 
 		# Jika masih ada halaman lagi
