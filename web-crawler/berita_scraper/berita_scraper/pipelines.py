@@ -7,6 +7,11 @@
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 
+# Daftar Bulan
+DAFTAR_BULAN = {
+	'Januari':'01', 'Februari':'02', 'Maret':'03', 'April':'4', 'Mei':'5', 'Juni':'6', 'Juli':'7',
+	'Agustus':'08', 'September':'09', 'Oktober':'10', 'November':'11', 'Desember':'12',
+	}
 
 class BeritaScraperPipeline:
     def process_item(self, item, spider):
