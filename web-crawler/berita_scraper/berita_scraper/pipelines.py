@@ -7,6 +7,11 @@
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 
+# Daftar Bulan
+DAFTAR_BULAN = {
+	'Januari':'01', 'Februari':'02', 'Maret':'03', 'April':'4', 'Mei':'5', 'Juni':'6', 'Juli':'7',
+	'Agustus':'08', 'September':'09', 'Oktober':'10', 'November':'11', 'Desember':'12',
+	}
 
 class BeritaScraperPipeline:
     def process_item(self, item, spider):
@@ -126,34 +131,29 @@ class SindonewsPipeline:
 		# Mengecilkan seluruh tulisan
 		item['judul'] = item['judul'].lower()
 
+		# Kategori
+		# Menggabungkan semua kategori dengan '|'
+		item['kategori'] = ' | '.join(kata.strip() for kata in item['kategori'])
+
 		# Tanggal
 		# Mengambil bagian tanggal saja
-		item['tanggal'] = ' '.join(item['tanggal'].split(' ')[1:4])
+		tanggal = item['tanggal'].split(' ')[1:4]
+		bulan = DAFTAR_BULAN[tanggal[1]]
+		item['tanggal'] = '{thn}/{bln}/{tgl}'.format(thn=tanggal[2], bln=bulan, tgl=tanggal[0])
 
 		# Isi
-		# Mencari lokasi referensi artikel lain
-		isi = [kata.lower() for kata in item['isi']]
-		iklan_idx_satu = []
-		iklan_idx_dua = []
-		for idx, val in enumerate(isi):
-			if val.startswith('(baca') or val.startswith(' (baca'):
-				iklan_idx_satu.append(idx)
-			elif val.endswith('('):
-				iklan_idx_dua.append(idx)
-
-		# Menghapus referensi artikel lain
-		if iklan_idx_satu:
-			for i in range(len(iklan_idx_satu)-1, -1,-1):
-				del item['isi'][iklan_idx_satu[i]]
-		elif iklan_idx_dua:
-			for i in range(len(iklan_idx_dua)-1, -1,-1):
-				del item['isi'][iklan_idx_dua[i]+2]
-				del item['isi'][iklan_idx_dua[i]+1]
-				del item['isi'][iklan_idx_dua[i]]
-
-		
+		# Mencari lokasi referensi artikel lain dan menghapusnya dan
 		# Menggabungkan seluruh bagian teks menjadi utuh
-		item['isi'] = ''.join([kata for kata in item['isi']])
+		isi = [kata.lower() for kata in item['isi'] if kata.strip()]
+		list_iklan = ["baca juga", "baca:", "lihat videonya", "lihat grafis", "bisa diklik"]
+		for iklan in list_iklan:
+			iklan_idx = [idx for idx, kata in enumerate(isi) if iklan in kata]
+			for i in range(len(iklan_idx)-1,-1,-1):
+				while(len(isi[iklan_idx[i]]) <= 17):
+					del isi[iklan_idx[i]]
+				del isi[iklan_idx[i]]
+
+		item['isi'] = ''.join([kata for kata in isi])
 
 
 		# Jumlah Komentar
