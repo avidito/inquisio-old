@@ -1,5 +1,6 @@
 .scrapy/
 __pycache__/
+logs/
 
 *.csv
 *.json

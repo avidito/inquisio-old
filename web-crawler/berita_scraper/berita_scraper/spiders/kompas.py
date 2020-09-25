@@ -39,7 +39,7 @@ class KompasSpider(Spider):
 
 		# Request ke halaman berikutnya
 		url_halaman_berikutnya = response.xpath('//a[@rel="next"]/@href').extract_first()
-		absolute_url_halaman_berikutnya = url_halaman_berikutnya
+		absolute_url_halaman_berikutnya = response.urljoin(url_halaman_berikutnya)
 		yield Request(url=absolute_url_halaman_berikutnya, callback=self.parse)
 
 	# METHOD PARSE INFO
@@ -47,7 +47,7 @@ class KompasSpider(Spider):
 		judul 	  = response.xpath('//h1[@class="read__title"]/text()').extract_first()
 		kategori  = response.xpath('//li[@class="tag__article__item"]//text()').extract()
 		tanggal   = response.xpath('//div[@class="read__time"]/text()').extract_first()
-		isi 	  = response.xpath('//div[@class="read__content"]/*[self::p or self::ul/li]//text()').extract()
+		isi 	  = response.xpath('//div[@class="read__content"]/*[self::p or self::ul/li or self::h2]//text()').extract()
 		jumlah_sk = response.xpath('//div[@class="total_comment_share"]/text()').extract_first()
 		item = BeritaScraperItem({
 				'judul': judul, 'kategori': kategori, 'tanggal': tanggal, 'isi': isi, 'jumlah_sk': jumlah_sk})
