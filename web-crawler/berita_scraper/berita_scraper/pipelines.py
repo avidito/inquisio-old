@@ -11,6 +11,8 @@ from itemadapter import ItemAdapter
 DAFTAR_BULAN = {
 	'Januari':'01', 'Februari':'02', 'Maret':'03', 'April':'4', 'Mei':'5', 'Juni':'6', 'Juli':'7',
 	'Agustus':'08', 'September':'09', 'Oktober':'10', 'November':'11', 'Desember':'12',
+	'Jan':'01', 'Feb':'02', 'Mar':'03', 'Apr':'4', 'Mei':'5', 'Jun':'6', 'Jul':'7',
+	'Agu':'08', 'Sep':'09', 'Okt':'10', 'Nov':'11', 'Des':'12',
 	}
 
 class BeritaScraperPipeline:
@@ -101,19 +103,32 @@ class DetikPipeline:
 			return item
 
 		# Judul
-		# Menggabungkan seluruh kata pada judul
-		judul = item['judul'].strip()
+		# Menggabungkan seluruh kata pada judul dan mengecilkan huruf
+		item['judul'] = item['judul'].strip().lower()
 
-		# Mengecilkan seluruh tulisan
-		item['judul'] = judul.lower()
+		# Kategori
+		# Menggabungkan semua kategori dengan '|'
+		item['kategori'] = ' | '.join(kata.strip() for kata in item['kategori'])
 
 		# Tanggal
 		# Mengambil bagian tanggal saja
-		item['tanggal'] = ' '.join(item['tanggal'].split(' ')[1:4])
-
+		tanggal = item['tanggal'].split(' ')[1:4]
+		bulan = DAFTAR_BULAN[tanggal[1]]
+		item['tanggal'] = '{thn}/{bln}/{tgl}'.format(thn=tanggal[2], bln=bulan, tgl=tanggal[0])
+		
 		# Isi
+		# Mencari lokasi referensi artikel lain dan menghapusnya dan
 		# Menggabungkan seluruh bagian teks menjadi utuh
-		item['isi'] = ''.join([kata for kata in item['isi']])
+		isi = [kata.lower() for kata in item['isi'] if kata.strip()]
+		list_iklan = ["you may also like", "bisa dibaca di", "dengarkan di sini"]
+		for iklan in list_iklan:
+			iklan_idx = [idx for idx, kata in enumerate(isi) if iklan in kata]
+			for i in range(len(iklan_idx)-1,-1,-1):
+				while(len(isi[iklan_idx[i]]) <= 18):
+					del isi[iklan_idx[i]]
+				del isi[iklan_idx[i]]
+
+		item['isi'] = ''.join([kata for kata in isi])
 
 		# Jumlah Komentar
 		# Mengambil angka yang merupakan jumlah komentar
