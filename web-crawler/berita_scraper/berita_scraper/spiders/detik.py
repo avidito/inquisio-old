@@ -11,6 +11,10 @@ class DetikSpider(Spider):
 			'detik.com/indeks/',		
 			]
 
+	custom_settings = {
+		'ITEM_PIPELINES': {'berita_scraper.pipelines.DetikPipeline': 300,}
+	}
+
 	# METHOD INISIASI
 	def __init__(self, kategori="news", tanggal=None):
 		self.kategori = kategori
@@ -27,22 +31,27 @@ class DetikSpider(Spider):
 	# METHOD PARSE UTAMA
 	def parse(self, response):
 		# Ekstraksi URL dari artikel dan request ke URL artikel
-		daftar_url_berita = response.xpath('//h3[@class="media__title"]/a/@href').extract()
+		daftar_url_berita = response.xpath('//h3/a/@href').extract()
+		if not daftar_url_berita:
+			daftar_url_berita = response.xpath('//li/article//a/@href').extract()
 		for url_berita in daftar_url_berita:
 			absolute_url_berita = url_berita + '?single=1'
 			yield Request(url=absolute_url_berita, callback=self.parse_info)
 
 		# Request ke halaman berikutnya
-		url_halaman_berikutnya = response.xpath('//a[text()="Next"]/@href').extract_first()
-		yield Request(url=url_halaman_berikutnya, callback=self.parse)
+		# url_halaman_berikutnya = response.xpath('//a[text()="Next"]/@href').extract_first()
+		# yield Request(url=url_halaman_berikutnya, callback=self.parse)
 
 	# METHOD PARSE INFO
 	def parse_info(self, response):
+		judul		= response.xpath('//h1/text()').extract_first()
+		kategori	= response.xpath('//div[@class="nav" or @class="detail_tag"]/a/text()').extract()
+		tanggal		= response.xpath('//*[contains(@class, "date")]/text()').extract_first()
+		isi			= response.xpath('//div[contains(@class, "itp_bodycontent")]//text()[(ancestor::p or ancestor::li)]').extract()
+		jumlah_sk	= response.xpath('//div[contains(@class, "share-box")]//a[contains(@class,"komentar")]//span/text()').extract_first()
+		
 		item = BeritaScraperItem({
-					'judul'		: response.xpath('//h1[@class="detail__title"]/text()').extract_first(),
-					'kategori'	: response.xpath('//div[@class="page__breadcrumb"]/a/text()')[-1].extract(),
-					'tanggal'	: response.xpath('//div[@class="detail__date"]/text()').extract_first(),
-					'isi'		: response.xpath('//div[@class="detail__body-text itp_bodycontent"]/p//text()').extract(),
-					'jumlah_sk'	: response.xpath('//div[@class="flex-between share-box"]//span/text()').extract_first(),
-				})
+			'judul': judul, 'kategori': kategori, 'tanggal': tanggal, 'isi': isi, 'jumlah_sk': jumlah_sk
+			})
+
 		yield item
