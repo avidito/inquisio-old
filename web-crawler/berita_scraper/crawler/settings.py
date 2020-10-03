@@ -9,8 +9,8 @@
 
 BOT_NAME = 'berita_scraper'
 
-SPIDER_MODULES = ['berita_scraper.spiders']
-NEWSPIDER_MODULE = 'berita_scraper.spiders'
+SPIDER_MODULES = ['crawler.spiders']
+NEWSPIDER_MODULE = 'crawler.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent

@@ -3,7 +3,8 @@ from scrapy import Request
 
 from datetime import datetime
 
-from berita_scraper.items import BeritaScraperItem
+from crawler.items import BeritaScraperItem
+
 
 class OkezoneSpider(Spider):
 	name = 'okezone'
@@ -13,7 +14,7 @@ class OkezoneSpider(Spider):
 	]
 
 	custom_settings = {
-		'ITEM_PIPELINES': {'berita_scraper.pipelines.OkezonePipeline': 300,}
+		'ITEM_PIPELINES': {'crawler.pipelines.OkezonePipeline': 300,}
 	}
 
 	# METHOD INISIASI

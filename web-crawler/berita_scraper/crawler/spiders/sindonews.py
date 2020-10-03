@@ -2,7 +2,9 @@ from scrapy import Spider
 from scrapy import Request
 
 from datetime import datetime
-from berita_scraper.items import BeritaScraperItem
+
+from crawler.items import BeritaScraperItem
+
 
 class SindonewsSpider(Spider):
 	name = 'sindonews'
@@ -12,7 +14,7 @@ class SindonewsSpider(Spider):
 		]
 
 	custom_settings = {
-		'ITEM_PIPELINES': {'berita_scraper.pipelines.SindonewsPipeline': 300,}
+		'ITEM_PIPELINES': {'crawler.pipelines.SindonewsPipeline': 300,}
 	}
 
 	# METHOD INISIASI

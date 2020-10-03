@@ -2,7 +2,9 @@ from scrapy import Spider
 from scrapy import Request
 
 from datetime import datetime
-from berita_scraper.items import BeritaScraperItem
+
+from crawler.items import BeritaScraperItem
+
 
 class DetikSpider(Spider):
 	name = 'detik'
@@ -12,7 +14,7 @@ class DetikSpider(Spider):
 			]
 
 	custom_settings = {
-		'ITEM_PIPELINES': {'berita_scraper.pipelines.DetikPipeline': 300,}
+		'ITEM_PIPELINES': {'crawler.pipelines.DetikPipeline': 300,}
 	}
 
 	# METHOD INISIASI
