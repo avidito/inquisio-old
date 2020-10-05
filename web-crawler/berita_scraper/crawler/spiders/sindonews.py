@@ -1,8 +1,11 @@
+# Modul Scrapy
 from scrapy import Spider
 from scrapy import Request
 
+# Modul Utilitas
 from datetime import datetime
 
+# Modul Projek
 from crawler.items import BeritaScraperItem
 
 
@@ -18,9 +21,9 @@ class SindonewsSpider(Spider):
 	}
 
 	# METHOD INISIASI
-	def __init__(self, kategori='0', tanggal=None):
-		self.kategori = kategori
-		self.tanggal = tanggal if tanggal is not None else datetime.now().strftime("%Y-%m-%d")
+	def __init__(self, kategori="default", tanggal="none"):
+		self.kategori = kategori if (kategori != "default") else "0"
+		self.tanggal = tanggal if (tanggal != "none") else datetime.now().strftime("%Y-%m-%d")
 
 
 	# METHOD REQUEST PERTAMA

@@ -1,5 +1,6 @@
 # Modul Scrapy
-from scrapy import Spider, Request
+from scrapy import Spider
+from scrapy import Request
 
 # Modul Utilitas
 from datetime import datetime
@@ -20,9 +21,9 @@ class KompasSpider(Spider):
 	}
 
 	# METHOD INISIASI
-	def __init__(self, kategori="default", tanggal="None"):
+	def __init__(self, kategori="default", tanggal="none"):
 		self.kategori = kategori if (kategori != "default") else "all"
-		self.tanggal = tanggal if (tanggal is not "None") else datetime.now().strftime("%Y-%m-%d")
+		self.tanggal = tanggal if (tanggal != "none") else datetime.now().strftime("%Y-%m-%d")
 
 	# METHOD REQUEST PERTAMA
 	def start_requests(self):
