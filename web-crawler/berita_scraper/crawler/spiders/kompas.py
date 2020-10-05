@@ -20,9 +20,9 @@ class KompasSpider(Spider):
 	}
 
 	# METHOD INISIASI
-	def __init__(self, kategori="tekno", tanggal=None):
-		self.kategori = kategori
-		self.tanggal = tanggal if tanggal is not None else datetime.now().strftime("%Y-%m-%d")
+	def __init__(self, kategori="default", tanggal="None"):
+		self.kategori = kategori if (kategori != "default") else "all"
+		self.tanggal = tanggal if (tanggal is not "None") else datetime.now().strftime("%Y-%m-%d")
 
 	# METHOD REQUEST PERTAMA
 	def start_requests(self):

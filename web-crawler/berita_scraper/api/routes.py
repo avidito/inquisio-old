@@ -19,10 +19,15 @@ def mulai_crawling():
 	# Selainnya, kembalikan pesan untuk mengisi argumen
 	if ('spider' in request.args):
 		spider = request.args['spider']
-		pesan = penugasan_spider(spider)
+
+		# Mengambil situs dan tanggal dari query
+		kategori = "default" if ('kategori' not in request.args) else request.args['kategori']
+		tanggal = "none" if ('tanggal' not in request.args) else request.args['tanggal']
+
+		pesan = penugasan_spider(spider, kategori, tanggal)
 		return jsonify(pesan)
 	else:
-		return jsonify({'status':'ditolak', 'message': 'membutuhkan argumen untuk menjalankan spider'})
+		return jsonify({'status':'ditolak', 'message': 'membutuhkan argumen "spider" untuk menjalankan spider'})
 
 # API untuk mengekstraksi hasil crawling oleh Spider
 @app.route('/api/hasil/berita', methods=['GET'])

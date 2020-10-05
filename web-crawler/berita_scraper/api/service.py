@@ -34,7 +34,7 @@ SELESAI = {
 
 # SERVIS PENUGASAN SPIDER
 # Fungsi Perantara untuk menjalankan spider
-def penugasan_spider(nama_spider):
+def penugasan_spider(nama_spider, kategori, tanggal):
 	global DAFTAR_HASIL
 	global BERKERJA
 	global SELESAI
@@ -51,12 +51,12 @@ def penugasan_spider(nama_spider):
 		SELESAI[nama_spider] = False
 
 		# Jalankan servis
-		_crawling(nama_spider)
+		_crawling(nama_spider, kategori, tanggal)
 		return {'status': 'diterima', 'message': 'penugasan untuk spider diterima'}
 
 # Servis untuk membuat proses scraping oleh spider
 @crochet.run_in_reactor
-def _crawling(nama_spider):
+def _crawling(nama_spider, kategori, tanggal):
 	# Pengaturan path ke settings scrapy
 	settings_file_path = 'crawler.settings'
 	os.environ.setdefault('SCRAPY_SETTINGS_MODULE', settings_file_path)
@@ -69,7 +69,7 @@ def _crawling(nama_spider):
 
 	# Menjalankan event
 	runner = CrawlerRunner(get_project_settings())
-	event = runner.crawl(spider)
+	event = runner.crawl(spider, kategori=kategori, tanggal=tanggal)
 
 # Fungsi menyimpan hasil scraping
 def _menyimpan_data(item, response, spider):
