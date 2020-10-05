@@ -20,11 +20,12 @@ def mulai_crawling():
 	if ('spider' in request.args):
 		spider = request.args['spider']
 
-		# Mengambil situs dan tanggal dari query
+		# Mengambil situs, tanggal, dan jumlah dari query
 		kategori = "default" if ('kategori' not in request.args) else request.args['kategori']
 		tanggal = "none" if ('tanggal' not in request.args) else request.args['tanggal']
+		jumlah = 0 if ('jumlah' not in request.args) else request.args['jumlah']
 
-		pesan = penugasan_spider(spider, kategori, tanggal)
+		pesan = penugasan_spider(spider, kategori, tanggal, jumlah)
 		return jsonify(pesan)
 	else:
 		return jsonify({'status':'ditolak', 'message': 'membutuhkan argumen "spider" untuk menjalankan spider'})

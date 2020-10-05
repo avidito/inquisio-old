@@ -56,9 +56,10 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 5
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
-#EXTENSIONS = {
-#    'scrapy.extensions.telnet.TelnetConsole': None,
-#}
+# EXTENSIONS = {
+#    'scrapy.extensions.closespider.CloseSpider': 500,
+# }
+CLOSESPIDER_ITEMCOUNT = 0
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
