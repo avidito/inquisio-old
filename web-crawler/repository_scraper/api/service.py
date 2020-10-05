@@ -12,22 +12,30 @@ from scrapy import signals
 from scrapy.signalmanager import dispatcher
 
 # Modul Projek
-from crawler.spiders import ub
+from crawler.spiders import ub, unair, undip
 
 DAFTAR_SPIDER = {
 	'ub': ub.UbSpider,
+	'unair': unair.UnairSpider,
+	'undip': undip.UndipSpider,
 }
 
 DAFTAR_HASIL = {
 	'ub': [],
+	'unair': [],
+	'undip': [],
 }
 
 BERKERJA = {
 	'ub': False,
+	'unair': False,
+	'undip': False,
 }
 
 SELESAI = {
 	'ub': False,
+	'unair': False,
+	'undip': False,
 }
 
 
@@ -84,8 +92,6 @@ def _menyimpan_data(item, response, spider):
 
 	nama_spider = spider.name
 	DAFTAR_HASIL[nama_spider].append(dict(item))
-
-	print(dict(item))
 
 # Fungsi alarm ketika spider telah selesai
 def _tugas_selesai(spider):

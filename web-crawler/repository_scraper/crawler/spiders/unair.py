@@ -18,8 +18,8 @@ class UnairSpider(Spider):
     }
 
     # METHOD INISIASI
-    def __init__(self, tahun=None):
-    	self.tahun = tahun if (tahun is not None) else datetime.now().strftime("%Y")
+    def __init__(self, tahun="none"):
+    	self.tahun = tahun if (tahun != "none") else datetime.now().strftime("%Y")
 
     # METHOD REQUESTS PERTAMA
     def start_requests(self):
