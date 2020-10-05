@@ -14,7 +14,7 @@ def indeks():
 # API untuk menjalankan Spider
 # Argumen : spider, kategori, tanggal, jumlah
 @app.route('/api/crawl/berita', methods=['GET'])
-def mulai_crawling():
+def mulai_crawling_berita():
 	
 	# Jika ada argumen 'spider', lakukan penugasan dan kembalikan hasil scraping
 	# Selainnya, kembalikan pesan untuk mengisi argumen
@@ -26,6 +26,7 @@ def mulai_crawling():
 		tanggal = "none" if ('tanggal' not in request.args) else request.args['tanggal']
 		jumlah = 0 if ('jumlah' not in request.args) else request.args['jumlah']
 
+		# Jalankan service
 		pesan = penugasan_spider(spider, kategori, tanggal, jumlah)
 		return jsonify(pesan)
 	else:
@@ -34,10 +35,10 @@ def mulai_crawling():
 # API untuk mengekstraksi hasil crawling oleh Spider
 # Argumen : spider
 @app.route('/api/hasil/berita', methods=['GET'])
-def hasil_crawling():
+def hasil_crawling_berita():
 
-	# Jika ada argumen 'spider', ekstraksi hasil scraping
-	# Selainnya, kembalikan list kosong
+	# Jika ada argumen 'spider', lakukan penugasan dan kembalikan hasil scraping
+	# Selainnya, kembalikan pesan untuk mengisi argumen
 	if ('spider' in request.args):
 		spider = request.args['spider']
 		pesan, hasil = ekstraksi_hasil(spider)

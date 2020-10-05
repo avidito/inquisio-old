@@ -1,15 +1,15 @@
 # Modul Sistem
 import os
 
-# Modul Scrapy
-from scrapy.crawler import Crawler, CrawlerRunner
-from scrapy.utils.project import get_project_settings
-from scrapy import signals
-from scrapy.signalmanager import dispatcher
-
 # Modul Threading
 import crochet
 crochet.setup()
+
+# Modul Scrapy
+from scrapy.utils.project import get_project_settings
+from scrapy.crawler import Crawler, CrawlerRunner
+from scrapy import signals
+from scrapy.signalmanager import dispatcher
 
 # Modul Projek
 from crawler.spiders import detik, kompas, okezone, sindonews
@@ -52,30 +52,35 @@ def penugasan_spider(nama_spider, kategori, tanggal, jumlah):
 	global SELESAI
 
 	# Jika spider sedang bekerja, kembalikan status sibuk
-	# Selainnya, tugaskan spider sesuai argumen
+	# Selainnya, tugaskan spider sesuai argumen dan kembalikan status diterima
 	if (BERKERJA[nama_spider]):
 		return {'status': 'ditolak', 'message': 'spider sedang berkerja'}
 	else:
 
-		# Kosongkan hasil dan buat status berkerja
+		# Kosongkan hasil dan jalankan servis
 		DAFTAR_HASIL[nama_spider] = []
+		_crawling(nama_spider, kategori, tanggal, jumlah)
+
+		# Buat status spider menjadi berkerja
 		BERKERJA[nama_spider] = True
 		SELESAI[nama_spider] = False
 
-		# Jalankan servis
-		_crawling(nama_spider, kategori, tanggal, jumlah)
 		return {'status': 'diterima', 'message': 'penugasan untuk spider diterima'}
 
-# Servis untuk membuat proses scraping oleh spider
+# Servis untuk memulai proses scraping oleh spider
 @crochet.run_in_reactor
 def _crawling(nama_spider, kategori, tanggal, jumlah):
+	
 	# Pengaturan path ke settings scrapy
 	settings_file_path = 'crawler.settings'
 	os.environ.setdefault('SCRAPY_SETTINGS_MODULE', settings_file_path)
+	
+	# Konfigurasi setting yang akan digunakan
 	s = get_project_settings()
 	s.update({
 			'CLOSESPIDER_ITEMCOUNT': jumlah,
 		})
+
 	# Konfigurasi spider dan event-loop
 	spider = DAFTAR_SPIDER[nama_spider]
 	crawler = Crawler(spider, s)

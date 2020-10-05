@@ -14,7 +14,7 @@ class UnairSpider(Spider):
     	]
 
     custom_settings = {
-        'ITEM_PIPELINES': {'repository_scraper.pipelines.UnairPipeline': 300,},
+        'ITEM_PIPELINES': {'crawler.pipelines.UnairPipeline': 300,},
     }
 
     # METHOD INISIASI
