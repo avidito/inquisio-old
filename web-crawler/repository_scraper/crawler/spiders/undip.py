@@ -3,18 +3,18 @@ from scrapy import Request
 
 from datetime import datetime
 
-from repository_scraper.items import RepositoryScraperItem
+from crawler.items import RepositoryScraperItem
 
 
-class UbSpider(Spider):
-    name = 'ub'
-    allowed_domains = ['repository.ub.ac.id']
+class UndipSpider(Spider):
+    name = 'undip'
+    allowed_domains = ['eprints.undip.ac.id']
     start_urls = [
-    	'http://repository.ub.ac.id',
+    	'http://eprints.undip.ac.id',
     	]
 
     custom_settings = {
-        'ITEM_PIPELINES': {'repository_scraper.pipelines.UbPipeline': 300,},
+        'ITEM_PIPELINES': {'crawler.pipelines.UndipPipeline': 300,},
     }
 
     # METHOD INISIASI
@@ -39,10 +39,8 @@ class UbSpider(Spider):
     def parse_info(self, response):
     	item = RepositoryScraperItem({
         		'judul': response.xpath('//em/text()').extract_first(),
-        		'tahun': response.xpath('//span[@class="person_name" and last()]/following::text()').extract_first(),
-        		'divisi': response.xpath('//th[text()="Divisions:"]/following::td/a/text()').extract_first(),
-        		'abstrak': response.xpath('//h2[text()="Indonesian Abstract"]/following::p/text()').extract_first(),
+        		'tahun': response.xpath('//th[text()="Deposited On:"]/following::td/text()').extract_first(),
+        		'divisi': response.xpath('//th[text()="Divisions:"]/following::a/text()').extract_first(),
+        		'abstrak': response.xpath('//h2/following::p/text()').extract_first(),
     		})
     	yield item
-
-

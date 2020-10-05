@@ -3,7 +3,7 @@ from scrapy import Request
 
 from datetime import datetime
 
-from repository_scraper.items import RepositoryScraperItem
+from crawler.items import RepositoryScraperItem
 
 
 class UnairSpider(Spider):
