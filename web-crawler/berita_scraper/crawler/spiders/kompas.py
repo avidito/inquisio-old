@@ -1,9 +1,13 @@
+# Modul Scrapy
 from scrapy import Spider
 from scrapy import Request
 
+# Modul Utilitas
 from datetime import datetime
 
-from berita_scraper.items import BeritaScraperItem
+# Modul Projek
+from crawler.items import BeritaScraperItem
+
 
 class KompasSpider(Spider):
 	name = 'kompas'
@@ -13,13 +17,13 @@ class KompasSpider(Spider):
 		]
 
 	custom_settings = {
-		'ITEM_PIPELINES': {'berita_scraper.pipelines.KompasPipeline': 300,}
+		'ITEM_PIPELINES': {'crawler.pipelines.KompasPipeline': 300,}
 	}
 
 	# METHOD INISIASI
-	def __init__(self, kategori="all", tanggal=None):
-		self.kategori = kategori
-		self.tanggal = tanggal if tanggal is not None else datetime.now().strftime("%Y-%m-%d")
+	def __init__(self, kategori="default", tanggal="none"):
+		self.kategori = kategori if (kategori != "default") else "all"
+		self.tanggal = tanggal if (tanggal != "none") else datetime.now().strftime("%Y-%m-%d")
 
 	# METHOD REQUEST PERTAMA
 	def start_requests(self):
@@ -38,9 +42,9 @@ class KompasSpider(Spider):
 			yield Request(url=absolute_url_berita, callback=self.parse_info)
 
 		# Request ke halaman berikutnya
-		url_halaman_berikutnya = response.xpath('//a[@rel="next"]/@href').extract_first()
-		absolute_url_halaman_berikutnya = response.urljoin(url_halaman_berikutnya)
-		yield Request(url=absolute_url_halaman_berikutnya, callback=self.parse)
+		# url_halaman_berikutnya = response.xpath('//a[@rel="next"]/@href').extract_first()
+		# absolute_url_halaman_berikutnya = response.urljoin(url_halaman_berikutnya)
+		# yield Request(url=absolute_url_halaman_berikutnya, callback=self.parse)
 
 	# METHOD PARSE INFO
 	def parse_info(self, response):

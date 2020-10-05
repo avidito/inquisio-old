@@ -1,24 +1,29 @@
+# Modul Scrapy
 from scrapy import Spider
 from scrapy import Request
 
+# Modul Utilitas
 from datetime import datetime
-from berita_scraper.items import BeritaScraperItem
+
+# Modul Projek
+from crawler.items import BeritaScraperItem
+
 
 class DetikSpider(Spider):
 	name = 'detik'
 	allowed_domains = ['detik.com']
 	start_urls = [
-			'detik.com/indeks/',		
-			]
+		'detik.com/indeks/',		
+		]
 
 	custom_settings = {
-		'ITEM_PIPELINES': {'berita_scraper.pipelines.DetikPipeline': 300,}
+		'ITEM_PIPELINES': {'crawler.pipelines.DetikPipeline': 300,}
 	}
 
 	# METHOD INISIASI
-	def __init__(self, kategori="news", tanggal=None):
-		self.kategori = kategori
-		self.tanggal = tanggal if tanggal is not None else datetime.now().strftime("%m%d%Y")
+	def __init__(self, kategori="default", tanggal="none"):
+		self.kategori = kategori if (kategori != "default") else "news"
+		self.tanggal = tanggal if (tanggal != "none") else datetime.now().strftime("%m%d%Y")
 
 	# METHOD REQUEST PERTAMA
 	def start_requests(self):

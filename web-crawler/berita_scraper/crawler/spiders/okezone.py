@@ -1,25 +1,29 @@
+# Modul Scrapy
 from scrapy import Spider
 from scrapy import Request
 
+# Modul Utilitas
 from datetime import datetime
 
-from berita_scraper.items import BeritaScraperItem
+# Modul Projek
+from crawler.items import BeritaScraperItem
+
 
 class OkezoneSpider(Spider):
 	name = 'okezone'
 	allowed_domains = ['okezone.com']
 	start_urls = [
 		'http://index.okezone.com',
-	]
+		]
 
 	custom_settings = {
-		'ITEM_PIPELINES': {'berita_scraper.pipelines.OkezonePipeline': 300,}
+		'ITEM_PIPELINES': {'crawler.pipelines.OkezonePipeline': 300,}
 	}
 
 	# METHOD INISIASI
-	def __init__(self, kategori="1", tanggal=None):
-		self.kategori = kategori
-		self.tanggal = tanggal if tanggal is not None else datetime.now().strftime("%Y/%m/%d")
+	def __init__(self, kategori="default", tanggal="none"):
+		self.kategori = kategori if (kategori != "default") else "1"
+		self.tanggal = tanggal if (tanggal != "none") else datetime.now().strftime("%Y/%m/%d")
 
 	# METHOD REQUEST PERTAMA
 	def start_requests(self):
