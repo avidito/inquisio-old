@@ -1,8 +1,10 @@
-from scrapy import Spider
-from scrapy import Request
+# Modul Scrapy
+from scrapy import Spider, Request
 
+# Modul Utilitas
 from datetime import datetime
 
+# Modul Projek
 from crawler.items import BeritaScraperItem
 
 
@@ -18,7 +20,7 @@ class KompasSpider(Spider):
 	}
 
 	# METHOD INISIASI
-	def __init__(self, kategori="all", tanggal=None):
+	def __init__(self, kategori="tekno", tanggal=None):
 		self.kategori = kategori
 		self.tanggal = tanggal if tanggal is not None else datetime.now().strftime("%Y-%m-%d")
 
@@ -39,9 +41,9 @@ class KompasSpider(Spider):
 			yield Request(url=absolute_url_berita, callback=self.parse_info)
 
 		# Request ke halaman berikutnya
-		url_halaman_berikutnya = response.xpath('//a[@rel="next"]/@href').extract_first()
-		absolute_url_halaman_berikutnya = response.urljoin(url_halaman_berikutnya)
-		yield Request(url=absolute_url_halaman_berikutnya, callback=self.parse)
+		# url_halaman_berikutnya = response.xpath('//a[@rel="next"]/@href').extract_first()
+		# absolute_url_halaman_berikutnya = response.urljoin(url_halaman_berikutnya)
+		# yield Request(url=absolute_url_halaman_berikutnya, callback=self.parse)
 
 	# METHOD PARSE INFO
 	def parse_info(self, response):
