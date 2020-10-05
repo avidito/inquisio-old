@@ -12,6 +12,7 @@ def indeks():
 	return "<h1>Flask sudah berjalan</h1>"
 
 # API untuk menjalankan Spider
+# Argumen : spider, kategori, tanggal, jumlah
 @app.route('/api/crawl/berita', methods=['GET'])
 def mulai_crawling():
 	
@@ -31,6 +32,7 @@ def mulai_crawling():
 		return jsonify({'status':'ditolak', 'message': 'membutuhkan argumen "spider" untuk menjalankan spider'})
 
 # API untuk mengekstraksi hasil crawling oleh Spider
+# Argumen : spider
 @app.route('/api/hasil/berita', methods=['GET'])
 def hasil_crawling():
 

@@ -93,8 +93,6 @@ def _menyimpan_data(item, response, spider):
 	nama_spider = spider.name
 	DAFTAR_HASIL[nama_spider].append(dict(item))
 
-	print(dict(item))
-
 # Fungsi alarm ketika spider telah selesai
 def _tugas_selesai(spider):
 	global BERKERJA
