@@ -59,6 +59,8 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 5
 # EXTENSIONS = {
 #    'scrapy.extensions.closespider.CloseSpider': 500,
 # }
+
+# CloseSpider Extension
 CLOSESPIDER_ITEMCOUNT = 0
 
 # Configure item pipelines

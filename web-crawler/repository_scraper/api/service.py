@@ -12,41 +12,36 @@ from scrapy import signals
 from scrapy.signalmanager import dispatcher
 
 # Modul Projek
-from crawler.spiders import detik, kompas, okezone, sindonews
+from crawler.spiders import ub, unair, undip
 
-# Variable Global Spider
 DAFTAR_SPIDER = {
-	'detik': detik.DetikSpider,
-	'kompas': kompas.KompasSpider,
-	'okezone': okezone.OkezoneSpider,
-	'sindonews': sindonews.SindonewsSpider,
+	'ub': ub.UbSpider,
+	'unair': unair.UnairSpider,
+	'undip': undip.UndipSpider,
 }
 
 DAFTAR_HASIL = {
-	'detik': [],
-	'kompas': [],
-	'okezone': [],
-	'sindonews': [],
+	'ub': [],
+	'unair': [],
+	'undip': [],
 }
 
 BERKERJA = {
-	'detik': False,
-	'kompas': False,
-	'okezone': False,
-	'sindonews': False,
+	'ub': False,
+	'unair': False,
+	'undip': False,
 }
 
 SELESAI = {
-	'detik': False,
-	'kompas': False,
-	'okezone': False,
-	'sindonews': False,
+	'ub': False,
+	'unair': False,
+	'undip': False,
 }
 
 
 # SERVIS PENUGASAN SPIDER
-# Fungsi Perantara untuk menjalankan spider
-def penugasan_spider(nama_spider, kategori, tanggal, jumlah):
+# Fungsi perantara untuk menjalankan spider
+def penugasan_spider(nama_spider, tahun, jumlah):
 	global DAFTAR_HASIL
 	global BERKERJA
 	global SELESAI
@@ -59,7 +54,7 @@ def penugasan_spider(nama_spider, kategori, tanggal, jumlah):
 
 		# Kosongkan hasil dan jalankan servis
 		DAFTAR_HASIL[nama_spider] = []
-		_crawling(nama_spider, kategori, tanggal, jumlah)
+		_crawling(nama_spider, tahun, jumlah)
 
 		# Buat status spider menjadi berkerja
 		BERKERJA[nama_spider] = True
@@ -69,12 +64,12 @@ def penugasan_spider(nama_spider, kategori, tanggal, jumlah):
 
 # Servis untuk memulai proses scraping oleh spider
 @crochet.run_in_reactor
-def _crawling(nama_spider, kategori, tanggal, jumlah):
+def _crawling(nama_spider, tahun, jumlah):
 	
 	# Pengaturan path ke settings scrapy
-	settings_file_path = 'crawler.settings'
-	os.environ.setdefault('SCRAPY_SETTINGS_MODULE', settings_file_path)
-	
+	settings_path = 'crawler.settings'
+	os.environ.setdefault('SCRAPY_SETTINGS_MODULE', settings_path)
+
 	# Konfigurasi setting yang akan digunakan
 	s = get_project_settings()
 	s.update({
@@ -89,7 +84,7 @@ def _crawling(nama_spider, kategori, tanggal, jumlah):
 
 	# Menjalankan event
 	runner = CrawlerRunner(s)
-	event = runner.crawl(spider, kategori=kategori, tanggal=tanggal)
+	runner.crawl(crawler, tahun=tahun)
 
 # Fungsi menyimpan hasil scraping
 def _menyimpan_data(item, response, spider):
@@ -121,8 +116,8 @@ def ekstraksi_hasil(nama_spider):
 	# Jika spider selesai, kembalikan hasil scraping
 	# Selainnya, kembalikan pesan spider sedang tidak bekerja
 	if (BERKERJA[nama_spider]):
-		return ({'status': 'sibuk', 'message': 'spider masih berkerja'}, None)
+		return ({'status': 'sibuk', 'message':'spider masih berkerja'}, None)
 	elif (SELESAI[nama_spider]):
 		return ('selesai', DAFTAR_HASIL[nama_spider])
 	else:
-		return ({'status': 'ditolak', 'message': 'spider sedang tidak berkerja'}, None)
+		return ({'status': 'ditolak', 'message':'spider sedang tidak berkerja'}, None)
