@@ -16,31 +16,31 @@ from crawler.spiders import detik, kompas, okezone, sindonews
 
 # Variable Global Spider
 DAFTAR_SPIDER = {
-	'detik': detik.DetikSpider,
-	'kompas': kompas.KompasSpider,
-	'okezone': okezone.OkezoneSpider,
-	'sindonews': sindonews.SindonewsSpider,
+	"detik": detik.DetikSpider,
+	"kompas": kompas.KompasSpider,
+	"okezone": okezone.OkezoneSpider,
+	"sindonews": sindonews.SindonewsSpider,
 }
 
 DAFTAR_HASIL = {
-	'detik': [],
-	'kompas': [],
-	'okezone': [],
-	'sindonews': [],
+	"detik": [],
+	"kompas": [],
+	"okezone": [],
+	"sindonews": [],
 }
 
 BERKERJA = {
-	'detik': False,
-	'kompas': False,
-	'okezone': False,
-	'sindonews': False,
+	"detik": False,
+	"kompas": False,
+	"okezone": False,
+	"sindonews": False,
 }
 
 SELESAI = {
-	'detik': False,
-	'kompas': False,
-	'okezone': False,
-	'sindonews': False,
+	"detik": False,
+	"kompas": False,
+	"okezone": False,
+	"sindonews": False,
 }
 
 
@@ -54,7 +54,10 @@ def penugasan_spider(nama_spider, kategori, tanggal, jumlah):
 	# Jika spider sedang bekerja, kembalikan status sibuk
 	# Selainnya, tugaskan spider sesuai argumen dan kembalikan status diterima
 	if (BERKERJA[nama_spider]):
-		return {'status': 'ditolak', 'message': 'spider sedang berkerja'}
+		return {
+				"status": "sibuk",
+				"message": "'{s}' spider masih berkerja".format(s=nama_spider)
+				}
 	else:
 
 		# Kosongkan hasil dan jalankan servis
@@ -65,20 +68,23 @@ def penugasan_spider(nama_spider, kategori, tanggal, jumlah):
 		BERKERJA[nama_spider] = True
 		SELESAI[nama_spider] = False
 
-		return {'status': 'diterima', 'message': 'penugasan untuk spider diterima'}
+		return {
+				"status": "diterima",
+				"message": "penugasan untuk '{s}' spider berhasil diterima".format(s=nama_spider)
+			}
 
 # Servis untuk memulai proses scraping oleh spider
 @crochet.run_in_reactor
 def _crawling(nama_spider, kategori, tanggal, jumlah):
 	
 	# Pengaturan path ke settings scrapy
-	settings_file_path = 'crawler.settings'
-	os.environ.setdefault('SCRAPY_SETTINGS_MODULE', settings_file_path)
+	settings_file_path = "crawler.settings"
+	os.environ.setdefault("SCRAPY_SETTINGS_MODULE", settings_file_path)
 	
 	# Konfigurasi setting yang akan digunakan
 	s = get_project_settings()
 	s.update({
-			'CLOSESPIDER_ITEMCOUNT': jumlah,
+			"CLOSESPIDER_ITEMCOUNT": jumlah,
 		})
 
 	# Konfigurasi spider dan event-loop
@@ -121,8 +127,18 @@ def ekstraksi_hasil(nama_spider):
 	# Jika spider selesai, kembalikan hasil scraping
 	# Selainnya, kembalikan pesan spider sedang tidak bekerja
 	if (BERKERJA[nama_spider]):
-		return ({'status': 'sibuk', 'message': 'spider masih berkerja'}, None)
+		return {
+			"status": "sibuk",
+			"message": "'{s}' spider masih berkerja".format(s=nama_spider),
+		}
 	elif (SELESAI[nama_spider]):
-		return ('selesai', DAFTAR_HASIL[nama_spider])
+		return {
+			"status": "diterima",
+			"message":"'{s}' spider sudah menyelesaikan pekerjaannya".format(s=nama_spider),
+			"hasil": DAFTAR_HASIL[nama_spider],
+		}
 	else:
-		return ({'status': 'ditolak', 'message': 'spider sedang tidak berkerja'}, None)
+		return {
+			"status": "ditolak",
+			"message": "'{s}' spider tidak memiliki pekerjaan".format(s=nama_spider),
+		}
