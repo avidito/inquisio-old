@@ -11,6 +11,7 @@ from .service import penugasan_spider, ekstraksi_hasil
 def indeks():
 	return "<h1>Flask sudah berjalan</h1>"
 
+
 # API untuk menjalankan Spider
 # Argumen : spider, kategori, tanggal, jumlah
 @app.route("/api/crawl/berita", methods=["POST"])
@@ -42,17 +43,11 @@ def mulai_crawling_berita():
 @app.route("/api/hasil/berita/<spider>", methods=["GET"])
 def hasil_crawling_berita(spider=None):
 
-	# Jika ada argumen "spider", lakukan penugasan dan kembalikan hasil scraping
+	# Jika ada argumen "spider", ekstraksi hasil scraping (jika sudah ada)
 	# Selainnya, kembalikan pesan untuk mengisi argumen
 	if (spider is not None):
 		hasil = ekstraksi_hasil(spider)
-
-		# Jika pesannya sudah selesai, kembalikan hasil
-		# Selainnya, kembalikan pesan untuk mengisi argumen
-		if (hasil["status"] == "diterima"):
-			return jsonify(hasil)
-		else:
-			return jsonify(hasil)
+		return jsonify(hasil)
 	else:
 		return jsonify({
 				"status": "ditolak",

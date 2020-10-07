@@ -55,9 +55,9 @@ def penugasan_spider(nama_spider, kategori, tanggal, jumlah):
 	# Selainnya, tugaskan spider sesuai argumen dan kembalikan status diterima
 	if (BERKERJA[nama_spider]):
 		return {
-				"status": "sibuk",
-				"message": "'{s}' spider masih berkerja".format(s=nama_spider)
-				}
+			"status": "sibuk",
+			"message": "'{s}' spider masih berkerja".format(s=nama_spider)
+		}
 	else:
 
 		# Kosongkan hasil dan jalankan servis
@@ -69,9 +69,9 @@ def penugasan_spider(nama_spider, kategori, tanggal, jumlah):
 		SELESAI[nama_spider] = False
 
 		return {
-				"status": "diterima",
-				"message": "penugasan untuk '{s}' spider berhasil diterima".format(s=nama_spider)
-			}
+			"status": "diterima",
+			"message": "penugasan untuk '{s}' spider berhasil diterima".format(s=nama_spider)
+		}
 
 # Servis untuk memulai proses scraping oleh spider
 @crochet.run_in_reactor
