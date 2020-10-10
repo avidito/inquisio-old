@@ -1,10 +1,11 @@
-from scrapy import Spider
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
 from scrapy import Request
 
 from datetime import datetime
 from berita_scraper.items import BeritaScraperItem
 
-class DetikSpider(Spider):
+class DetikSpider(CrawlSpider):
 	name = 'detik'
 	allowed_domains = ['detik.com']
 	start_urls = [
@@ -15,32 +16,57 @@ class DetikSpider(Spider):
 		'ITEM_PIPELINES': {'berita_scraper.pipelines.DetikPipeline': 300,}
 	}
 
-	# METHOD INISIASI
-	def __init__(self, kategori="news", tanggal=None):
-		self.kategori = kategori
-		self.tanggal = tanggal if tanggal is not None else datetime.now().strftime("%m%d%Y")
+	# RULES UNTUK EXCLUDE BEBERAPA URL
+	rules = (
+        Rule(LinkExtractor(restrict_xpaths=["//h3"], 
+            allow_domains="news.detik.com",
+            deny=[
+                r"/x/",
+                r"/blak-blakan/",
+                r"/infografis/",
+                r"/foto-news/",
+                r"/video/",
+            ]),
+            callback='parse_info', process_links="proses_link", follow=False),
 
-	# METHOD REQUEST PERTAMA
-	def start_requests(self):
-		for url in self.start_urls:
-			absolute_url = "https://{kategori}.{url}?date={tanggal}".format(kategori=self.kategori, url=url, tanggal=self.tanggal)
+        Rule(LinkExtractor(restrict_xpaths=["//h3"], 
+            allow_domains="finance.detik.com",
+            deny=[
+                r"/infografis/",
+            ]),
+            callback='parse_info', process_links="proses_link", follow=False),
 
-			# Request URL
-			yield Request(url=absolute_url, callback=self.parse)
+        Rule(LinkExtractor(restrict_xpaths=["//article"], 
+            allow_domains="health.detik.com",
+            allow=[
+                r"/berita-detikhealth/",
+                r"/diet/",
+                r"/kebugaran/"
+            ]),
+            callback='parse_info', process_links="proses_link", follow=False),
 
-	# METHOD PARSE UTAMA
-	def parse(self, response):
-		# Ekstraksi URL dari artikel dan request ke URL artikel
-		daftar_url_berita = response.xpath('//h3/a/@href').extract()
-		if not daftar_url_berita:
-			daftar_url_berita = response.xpath('//li/article//a/@href').extract()
-		for url_berita in daftar_url_berita:
-			absolute_url_berita = url_berita + '?single=1'
-			yield Request(url=absolute_url_berita, callback=self.parse_info)
+        Rule(LinkExtractor(restrict_xpaths=["//a[text()='Next']"],
+            allow_domains=[
+                "news.detik.com",
+                "finance.detik.com",
+                "health.detik.com"
+            ]), follow=True),
+    )
+    
+    # METHOD INISIASI
+	def __init__(self, *a, **kw):
+		super(DetikSpider, self).__init__(*a, **kw)
+		self.kategori = kw.get('kategori', 'health')
+		self.tanggal = kw.get('tanggal', datetime.now().strftime("%m/%d/%Y"))
+		for i in range(len(self.start_urls)):
+			url = self.start_urls[i]
+			self.start_urls[i] = "https://{kategori}.{url}?date={tanggal}".format(kategori=self.kategori, url=url, tanggal=self.tanggal)
 
-		# Request ke halaman berikutnya
-		# url_halaman_berikutnya = response.xpath('//a[text()="Next"]/@href').extract_first()
-		# yield Request(url=url_halaman_berikutnya, callback=self.parse)
+	# METHOD PROSES LINK
+	def proses_link(self, links):
+		for link in links:
+			link.url = link.url + "?single=1"
+		return links
 
 	# METHOD PARSE INFO
 	def parse_info(self, response):

@@ -1,11 +1,12 @@
-from scrapy import Spider
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
 from scrapy import Request
 
 from datetime import datetime
 
 from berita_scraper.items import BeritaScraperItem
 
-class OkezoneSpider(Spider):
+class OkezoneSpider(CrawlSpider):
 	name = 'okezone'
 	allowed_domains = ['okezone.com']
 	start_urls = [
@@ -16,31 +17,48 @@ class OkezoneSpider(Spider):
 		'ITEM_PIPELINES': {'berita_scraper.pipelines.OkezonePipeline': 300,}
 	}
 
-	# METHOD INISIASI
-	def __init__(self, kategori="1", tanggal=None):
-		self.kategori = kategori
-		self.tanggal = tanggal if tanggal is not None else datetime.now().strftime("%Y/%m/%d")
+	# RULES UNTUK EXCLUDE BEBERAPA URL
+	rules = (
+        Rule(LinkExtractor(restrict_xpaths=["//h4[@class='f17']"],
+        	allow_domains="news.okezone.com",
+        	allow=[
+        		r"/337/",
+        		r"/338/",
+        		r"/18/",
+        		r"/340/",
+        		r"/65/",
+        	]),
+            callback='parse_info', follow=False),
 
-	# METHOD REQUEST PERTAMA
-	def start_requests(self):
-		for url in self.start_urls:
-			absolute_url = url + '/bydate/channel/{t}/{k}'.format(k=self.kategori, t=self.tanggal)
+        Rule(LinkExtractor(restrict_xpaths=["//h4[@class='f17']"],
+        	allow_domains="economy.okezone.com",
+        	allow=[
+        		r"/320/",
+        		r"/622/",
+        		r"/455/",
+        		r"/470/",
+        	]),
+            callback='parse_info', follow=False),
 
-			# Request URL
-			yield Request(url=absolute_url, callback=self.parse)
+        Rule(LinkExtractor(restrict_xpaths=["//h4[@class='f17']"],
+        	allow_domains="techno.okezone.com",
+        	allow=[
+        		r"/16/",
+        	]),
+            callback='parse_info', follow=False),
 
-	# METHOD PARSE UTAMA
-	def parse(self, response):
-		# Ekstraksi URL dari artikel dan request ke URL artikel
-		daftar_url_berita = response.xpath('//h4[@class="f17"]/a/@href').extract()
-		for url_berita in daftar_url_berita:
-			absolute_url_berita = url_berita
-			yield Request(url=absolute_url_berita, callback=self.parse_info)
-
-		# Request ke halaman berikutnya
-		url_halaman_berikutnya = response.xpath('//a[contains(text(), "Next>")]/@href').extract_first()
-		absolute_url_halaman_berikutnya = response.urljoin(url_halaman_berikutnya)
-		yield Request(url=absolute_url_halaman_berikutnya, callback=self.parse)
+        Rule(LinkExtractor(restrict_xpaths=["//a[contains(text(), 'Next>')]"]), 
+        	follow=True),
+    )
+    
+    # METHOD INISIASI
+	def __init__(self, *a, **kw):
+		super(OkezoneSpider, self).__init__(*a, **kw)
+		self.kategori = kw.get('kategori', '1')
+		self.tanggal = kw.get('tanggal', datetime.now().strftime("%Y/%m/%d"))
+		for i in range(len(self.start_urls)):
+			url = self.start_urls[i]
+			self.start_urls[i] = url + "/bydate/channel/{t}/{k}".format(k=self.kategori, t=self.tanggal)
 	
 	# METHOD PARSE INFO
 	def parse_info(self, response):

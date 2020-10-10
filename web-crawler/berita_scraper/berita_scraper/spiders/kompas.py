@@ -1,11 +1,12 @@
-from scrapy import Spider
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
 from scrapy import Request
 
 from datetime import datetime
 
 from berita_scraper.items import BeritaScraperItem
 
-class KompasSpider(Spider):
+class KompasSpider(CrawlSpider):
 	name = 'kompas'
 	allowed_domains = ['kompas.com']
 	start_urls = [
@@ -16,31 +17,64 @@ class KompasSpider(Spider):
 		'ITEM_PIPELINES': {'berita_scraper.pipelines.KompasPipeline': 300,}
 	}
 
-	# METHOD INISIASI
-	def __init__(self, kategori="all", tanggal=None):
-		self.kategori = kategori
-		self.tanggal = tanggal if tanggal is not None else datetime.now().strftime("%Y-%m-%d")
+	# RULES UNTUK EXCLUDE BEBERAPA URL
+	rules = (
+        Rule(LinkExtractor(restrict_xpaths=["//a[@class='article__link']"], 
+            allow_domains="kompas.com",
+            allow=[
+            	r"/global/",
+            	r"/tren/",
+            	r"/sains/",
+            	r"/edu/",
+            	r"/skola/",
+            ]),
+            callback='parse_info', process_links="proses_link", follow=False),
 
-	# METHOD REQUEST PERTAMA
-	def start_requests(self):
-		for url in self.start_urls:
-			absolute_url = url + "/?site={k}&date={t}".format(k=self.kategori, t=self.tanggal)
-			
-			# Request URL
-			yield Request(url=absolute_url, callback=self.parse)
+        Rule(LinkExtractor(restrict_xpaths=["//a[@class='article__link']"], 
+            allow_domains="tekno.kompas.com",
+            deny=[
+            	r"/galeri/"
+            ]),
+            callback='parse_info', process_links="proses_link", follow=False),
 
-	# METHOD PARSE UTAMA
-	def parse(self, response):
-		# Ekstraksi URL dari artikel dan request ke URL artikel
-		daftar_url_berita = response.xpath('//a[@class="article__link"]/@href').extract()
-		for url_berita in daftar_url_berita:
-			absolute_url_berita = url_berita + '?page=all'
-			yield Request(url=absolute_url_berita, callback=self.parse_info)
+        Rule(LinkExtractor(restrict_xpaths=["//a[@class='article__link']"], 
+            allow_domains=[
+            	"nasional.kompas.com",
+            	"regional.kompas.com",
+            	"megapolitan.kompas.com",
+            	"inside.kompas.com",
+            	"kilasdaerah.kompas.com",
+            	"kilaskementerian.kompas.com",
+            	"kilasbadannegara.kompas.com",
+            	"kilaskorporasi.kompas.com",
+            	"kilasparlemen.kompas.com",
+            	"sorotpolitik.kompas.com",
+            	"money.kompas.com",
+            	"kilasbumn.kompas.com",
+            	"kilasbadan.kompas.com",
+            	"kilastransportasi.kompas.com",
+            	"kilasfintech.kompas.com",
+            	"health.kompas.com",
+            ]),
+            callback='parse_info', process_links="proses_link", follow=False),
 
-		# Request ke halaman berikutnya
-		url_halaman_berikutnya = response.xpath('//a[@rel="next"]/@href').extract_first()
-		absolute_url_halaman_berikutnya = response.urljoin(url_halaman_berikutnya)
-		yield Request(url=absolute_url_halaman_berikutnya, callback=self.parse)
+        Rule(LinkExtractor(restrict_xpaths=["//a[@rel='next']"]), follow=True),
+    )
+    
+    # METHOD INISIASI
+	def __init__(self, *a, **kw):
+		super(KompasSpider, self).__init__(*a, **kw)
+		self.kategori = kw.get('kategori', 'all')
+		self.tanggal = kw.get('tanggal', datetime.now().strftime("%Y-%m-%d"))
+		for i in range(len(self.start_urls)):
+			url = self.start_urls[i]
+			self.start_urls[i] = url + "/?site={k}&date={t}".format(k=self.kategori, t=self.tanggal)
+
+	# METHOD PROSES LINK
+	def proses_link(self, links):
+		for link in links:
+			link.url = link.url + "?page=all"
+		return links
 
 	# METHOD PARSE INFO
 	def parse_info(self, response):
