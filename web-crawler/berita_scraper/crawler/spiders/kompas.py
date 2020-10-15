@@ -1,10 +1,14 @@
+# Modul Scrapy
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from scrapy import Request
 
+# Modul Utilitas
 from datetime import datetime
 
-from berita_scraper.items import BeritaScraperItem
+# Modul Projek
+from crawler.items import BeritaScraperItem
+
 
 class KompasSpider(CrawlSpider):
 	name = 'kompas'
@@ -14,7 +18,7 @@ class KompasSpider(CrawlSpider):
 		]
 
 	custom_settings = {
-		'ITEM_PIPELINES': {'berita_scraper.pipelines.KompasPipeline': 300,}
+		'ITEM_PIPELINES': {'crawler.pipelines.KompasPipeline': 300,}
 	}
 
 	# RULES UNTUK EXCLUDE BEBERAPA URL

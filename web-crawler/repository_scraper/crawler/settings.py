@@ -1,4 +1,4 @@
-# Scrapy settings for berita_scraper project
+# Scrapy settings for repository_scraper project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -7,10 +7,10 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'berita_scraper'
+BOT_NAME = 'repository_scraper'
 
-SPIDER_MODULES = ['berita_scraper.spiders']
-NEWSPIDER_MODULE = 'berita_scraper.spiders'
+SPIDER_MODULES = ['crawler.spiders']
+NEWSPIDER_MODULE = 'crawler.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
@@ -25,7 +25,7 @@ CONCURRENT_REQUESTS = 5
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 10
+# DOWNLOAD_DELAY = 10
 # The download delay setting will honor only one of:
 CONCURRENT_REQUESTS_PER_DOMAIN = 5
 #CONCURRENT_REQUESTS_PER_IP = 16
@@ -45,13 +45,13 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 5
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    'berita_scraper.middlewares.BeritaScraperSpiderMiddleware': 543,
+#    'repository_scraper.middlewares.RepositoryScraperSpiderMiddleware': 543,
 #}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
-#    'berita_scraper.middlewares.BeritaScraperDownloaderMiddleware': 543,
+#    'repository_scraper.middlewares.RepositoryScraperDownloaderMiddleware': 543,
 #}
 
 # Enable or disable extensions
@@ -60,10 +60,13 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 5
 #    'scrapy.extensions.telnet.TelnetConsole': None,
 #}
 
+# CloseSpider Extension
+CLOSESPIDER_ITEMCOUNT = 0
+
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 # ITEM_PIPELINES = {
-#    'berita_scraper.pipelines.BeritaScraperPipeline': 300,
+#    'repository_scraper.pipelines.RepositoryScraperPipeline: 300,
 # }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

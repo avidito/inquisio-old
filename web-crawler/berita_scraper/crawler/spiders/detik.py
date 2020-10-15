@@ -1,22 +1,26 @@
+# Modul Scrapy
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from scrapy import Request
 
+# Modul Utilitas
 from datetime import datetime
-from berita_scraper.items import BeritaScraperItem
+
+# Modul Projek
+from crawler.items import BeritaScraperItem
+
 
 class DetikSpider(CrawlSpider):
 	name = 'detik'
 	allowed_domains = ['detik.com']
 	start_urls = [
-			'detik.com/indeks/',		
-			]
+		'detik.com/indeks/',		
+		]
 
 	custom_settings = {
-		'ITEM_PIPELINES': {'berita_scraper.pipelines.DetikPipeline': 300,}
+		'ITEM_PIPELINES': {'crawler.pipelines.DetikPipeline': 300,}
 	}
 
-	# RULES UNTUK EXCLUDE BEBERAPA URL
 	rules = (
         Rule(LinkExtractor(restrict_xpaths=["//h3"], 
             allow_domains="news.detik.com",

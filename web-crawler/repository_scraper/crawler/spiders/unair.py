@@ -3,7 +3,7 @@ from scrapy import Request
 
 from datetime import datetime
 
-from repository_scraper.items import RepositoryScraperItem
+from crawler.items import RepositoryScraperItem
 
 
 class UnairSpider(Spider):
@@ -14,12 +14,12 @@ class UnairSpider(Spider):
     	]
 
     custom_settings = {
-        'ITEM_PIPELINES': {'repository_scraper.pipelines.UnairPipeline': 300,},
+        'ITEM_PIPELINES': {'crawler.pipelines.UnairPipeline': 300,},
     }
 
     # METHOD INISIASI
-    def __init__(self, tahun=None):
-    	self.tahun = tahun if (tahun is not None) else datetime.now().strftime("%Y")
+    def __init__(self, tahun="none"):
+    	self.tahun = tahun if (tahun != "none") else datetime.now().strftime("%Y")
 
     # METHOD REQUESTS PERTAMA
     def start_requests(self):
