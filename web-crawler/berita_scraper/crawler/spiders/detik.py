@@ -31,14 +31,14 @@ class DetikSpider(CrawlSpider):
                 r"/foto-news/",
                 r"/video/",
             ]),
-            callback='parse_info', process_links="proses_link", follow=False),
+            callback='parse_info', process_links="process_links", follow=False),
 
         Rule(LinkExtractor(restrict_xpaths=["//h3"], 
             allow_domains="finance.detik.com",
             deny=[
                 r"/infografis/",
             ]),
-            callback='parse_info', process_links="proses_link", follow=False),
+            callback='parse_info', process_links="process_links", follow=False),
 
         Rule(LinkExtractor(restrict_xpaths=["//article"], 
             allow_domains="health.detik.com",
@@ -47,7 +47,7 @@ class DetikSpider(CrawlSpider):
                 r"/diet/",
                 r"/kebugaran/"
             ]),
-            callback='parse_info', process_links="proses_link", follow=False),
+            callback='parse_info', process_links="process_links", follow=False),
 
         Rule(LinkExtractor(restrict_xpaths=["//a[text()='Next']"],
             allow_domains=[
@@ -60,14 +60,14 @@ class DetikSpider(CrawlSpider):
     # METHOD INISIASI
 	def __init__(self, *a, **kw):
 		super(DetikSpider, self).__init__(*a, **kw)
-		self.kategori = kw.get('kategori', 'health')
-		self.tanggal = kw.get('tanggal', datetime.now().strftime("%m/%d/%Y"))
+		self.kategori = kw.get('category', 'health')
+		self.tanggal = kw.get('date', datetime.now().strftime("%m/%d/%Y"))
 		for i in range(len(self.start_urls)):
 			url = self.start_urls[i]
-			self.start_urls[i] = "https://{kategori}.{url}?date={tanggal}".format(kategori=self.kategori, url=url, tanggal=self.tanggal)
+			self.start_urls[i] = "https://{k}.{u}?date={t}".format(k=self.kategori, u=url, t=self.tanggal)
 
 	# METHOD PROSES LINK
-	def proses_link(self, links):
+	def process_links(self, links):
 		for link in links:
 			link.url = link.url + "?single=1"
 		return links

@@ -11,14 +11,14 @@ from crawler.items import BeritaScraperItem
 
 
 class SindonewsSpider(CrawlSpider):
-	name = 'sindonews'
-	allowed_domains = ['sindonews.com']
+	name = "sindonews"
+	allowed_domains = ["sindonews.com"]
 	start_urls = [
-		'https://index.sindonews.com/index/',
+		"https://index.sindonews.com/index/",
 		]
 
 	custom_settings = {
-		'ITEM_PIPELINES': {'crawler.pipelines.SindonewsPipeline': 300,}
+		"ITEM_PIPELINES": {"crawler.pipelines.SindonewsPipeline": 300,}
 	}
 
 	# RULES UNTUK EXCLUDE BEBERAPA URL
@@ -33,7 +33,7 @@ class SindonewsSpider(CrawlSpider):
             	"international.sindonews.com",
             	"edukasi.sindonews.com"
             ]),
-            callback='parse_info', process_links="proses_link", follow=False),
+            callback="parse_info", process_links="process_links", follow=False),
 
         Rule(LinkExtractor(restrict_xpaths=["//a[@rel='next']"]), follow=True),
     )
@@ -41,31 +41,31 @@ class SindonewsSpider(CrawlSpider):
     # METHOD INISIASI
 	def __init__(self, *a, **kw):
 		super(SindonewsSpider, self).__init__(*a, **kw)
-		self.kategori = kw.get('kategori', '0')
-		self.tanggal = kw.get('tanggal', datetime.now().strftime("%Y-%m-%d"))
+		self.kategori = kw.get("category", "0")
+		self.tanggal = kw.get("date", datetime.now().strftime("%Y-%m-%d"))
 		for i in range(len(self.start_urls)):
 			url = self.start_urls[i]
-			self.start_urls[i] = url + "{kategori}?t={tanggal}".format(kategori=self.kategori, tanggal=self.tanggal)
+			self.start_urls[i] = url + "{k}?t={t}".format(k=self.kategori, t=self.tanggal)
 
 	# METHOD PROSES LINK
-	def proses_link(self, links):
+	def process_links(self, links):
 		for link in links:
 			link.url = link.url + "?showpage=all"
 		return links
 
 	# METHOD PARSE INFO
 	def parse_info(self, response):
-		judul		= response.xpath('//*[@class="title" or self::h1]/text()').extract_first()
-		kategori	= response.xpath('//*[contains(@class, "tag") or @class="category-relative"]//li//a/text()').extract()
-		tanggal		= response.xpath('//time/text()').extract_first()
-		isi			= response.xpath('//section[@class="article col-md-11"]//text()[(parent::section or preceding::figcaption and following::span[@class="reporter"])]').extract()
-		jumlah_sk	= '0'
+		judul		= response.xpath("//*[@class='title' or self::h1]/text()").extract_first()
+		kategori	= response.xpath("//*[contains(@class, 'tag') or @class='category-relative']//li//a/text()").extract()
+		tanggal		= response.xpath("//time/text()").extract_first()
+		isi			= response.xpath("//section[@class='article col-md-11']//text()[(parent::section or preceding::figcaption and following::span[@class='reporter'])]").extract()
+		jumlah_sk	= "0"
 
 		if not isi:
-			isi = response.xpath('//div[@itemprop="articleBody"]//text()[(following::div[@class="reporter" or @class="editor"]) and not(ancestor::div[@class="baca-inline" or contains(@class,"ads300")])]').extract()
+			isi = response.xpath("//div[@itemprop='articleBody']//text()[(following::div[@class='reporter' or @class='editor']) and not(ancestor::div[@class='baca-inline' or contains(@class,'ads300')])]").extract()
 		
 		item = BeritaScraperItem({
-			'judul': judul, 'kategori': kategori, 'tanggal': tanggal, 'isi': isi, 'jumlah_sk': jumlah_sk
+			"judul": judul, "kategori": kategori, "tanggal": tanggal, "isi": isi, "jumlah_sk": jumlah_sk
 			})
 
 		yield item
