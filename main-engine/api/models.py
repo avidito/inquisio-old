@@ -35,6 +35,16 @@ class Tugas(db.Model):
 		tgl = self.tanggal.strftime("%d/%m/%Y")
 		return "Tugas({}, {}, {}, {})".format(self._id, self.kategori, tgl, self.jumlah)
 
+# Tabel Pencatatan Perintah untuk Interpreter
+class Perintah(db.Model):
+
+	_id = db.Column(db.Integer, primary_key=True)
+	tugas_id = db.Column(db.Integer, db.ForeignKey("tugas._id"), nullable=False)
+	manager_id = db.Column(db.Integer, db.ForeignKey("manager._id"), nullable=False)
+
+	tugas = db.relationship("Tugas", backref="penugasan", lazy=True)
+	manager = db.relationship("Manager", backref="penugasan", lazy=True)
+
 # Tabel Penyimpanan Data untuk Diproses
 class Hasil(db.Model):
 
@@ -46,4 +56,3 @@ class Hasil(db.Model):
 
 	def __repr__(self):
 		return "Hasil({}, tugas={}, {})".format(self._id, self.tugas_id, self.spider)
-

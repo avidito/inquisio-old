@@ -1,18 +1,21 @@
 from flask import jsonify, request
 
-from api import app
-from api.models import Manager, Tugas, Hasil
-from api.serializers import ManagerSchema, TugasSchema, HasilSchema
+from datetime import datetime
 
-dm_schema = ManagerSchema(many=True)
-dt_schema = TugasSchema(many=True)
-dh_schema = HasilSchema(many=True)
+from api import app
+from api.services import planning
 
 # Main Engine - Scheduler
 # API untuk memasukan task dalam penjadwalan
 # Argumen : kategori, tanggal, jumlah
 @app.route("/api/schedule", methods=["POST"])
 def scheduler():
+
+	kategori = request.json.get("kategori")
+	tanggal = request.json.get("tanggal")
+	jumlah =  request.json.get("jumlah")
+
+	planning(kategori, tanggal, jumlah)
 	return jsonify({
 			"status": "diterima",
 			"pesan": "tugas berhasil diterima",
@@ -45,12 +48,21 @@ def workshop():
 		})
 
 ####################### UTILITY #######################
+from api import db
+from api.models import Manager, Tugas, Hasil, Perintah
+from api.serializers import ManagerSchema, TugasSchema, HasilSchema, PerintahSchema
 
+dm_schema = ManagerSchema(many=True)
+dt_schema = TugasSchema(many=True)
+dp_schema = PerintahSchema(many=True)
+dh_schema = HasilSchema(many=True)
 utility = {
 		"manager": (Manager, dm_schema),
 		"tugas": (Tugas, dt_schema),
+		"perintah" : (Perintah, dp_schema),
 		"hasil": (Hasil, dh_schema),
 	}
+
 
 # Cek Tabel
 @app.route("/api/cek", methods=["GET"])
@@ -63,7 +75,7 @@ def cek_tabel():
 # Reset Tabel
 @app.route("/api/reset", methods=["DELETE"])
 def reset_tabel():
-	nama = request.arts.get("tabel")
+	nama = request.args.get("tabel")
 	t = utility[nama][0]
 	
 	if(nama == "manager"):
@@ -79,4 +91,3 @@ def reset_tabel():
 	return jsonify({
 			"pesan": "tabel {} sudah di-reset".format(nama)
 		})
-		
