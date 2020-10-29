@@ -68,8 +68,8 @@ class KompasSpider(CrawlSpider):
     # METHOD INISIASI
 	def __init__(self, *a, **kw):
 		super(KompasSpider, self).__init__(*a, **kw)
-		self.kategori = kw.get("category", "all")
-		self.tanggal = kw.get("date", datetime.now().strftime("%Y-%m-%d"))
+		self.kategori = kw.get("kategori", "all")
+		self.tanggal = kw.get("tanggal", datetime.now().strftime("%Y-%m-%d"))
 		for i in range(len(self.start_urls)):
 			url = self.start_urls[i]
 			self.start_urls[i] = url + "/?site={k}&date={t}".format(k=self.kategori, t=self.tanggal)

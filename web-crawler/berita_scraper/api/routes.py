@@ -7,7 +7,7 @@ from api.service import crawling, extract_results
 
 
 # API untuk membuat Spider memulai proses crawling
-# Argumen : spider, category, date, total
+# Argumen : spider, kategori, tanggal, jumlah
 @app.route("/api/crawl/berita", methods=["POST"])
 def spider_worker():
 	
@@ -17,18 +17,18 @@ def spider_worker():
 		spider = request.json["spider"]
 
 		# Mengambil situs, tanggal, dan jumlah dari query
-		category = request.json.get("category")
-		date = request.json.get("date")
-		total = request.json.get("total")
+		kategori = request.json.get("kategori")
+		tanggal = request.json.get("tanggal")
+		jumlah = request.json.get("jumlah")
 
 		# Jalankan service
-		message = crawling(spider, category, date, total)
+		message = crawling(spider, kategori, tanggal, jumlah)
 		return jsonify(message)
 
 	else:
 		return jsonify({
-				"status": "denied",
-				"message": "'spider' must be specified",
+				"status": "ditolak",
+				"pesan": "'spider' tidak dispesifikasikan",
 			})
 
 # API untuk mengekstraksi hasil crawling oleh Spider
@@ -44,6 +44,6 @@ def hasil_crawling_berita(spider=None):
 		return jsonify(hasil)
 	else:
 		return jsonify({
-				"status": "denied",
-				"message": "'spider' must be specified",
+				"status": "ditolak",
+				"message": "'spider' tidak dispesifikan",
 			})

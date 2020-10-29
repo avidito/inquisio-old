@@ -33,36 +33,36 @@ for key, _ in SPIDER_LIST.items():
 
 # SERVIS PENUGASAN SPIDER
 # Fungsi Perantara untuk menjalankan spider
-def crawling(spider_name, category, date, total):
+def crawling(nama_spider, kategori, tanggal, jumlah):
 	global RESULTS
 	global WORKING
 	global FINISH
 
 	# Jika spider sedang bekerja, kembalikan status sibuk
 	# Selainnya, tugaskan spider sesuai argumen dan kembalikan status diterima
-	if (WORKING[spider_name]):
+	if (WORKING[nama_spider]):
 		return {
-			"status": "busy",
-			"message": "'{s}' spider is still running".format(s=spider_name)
+			"status": "ditolak",
+			"message": "'{s}' spider masih bekerja".format(s=nama_spider)
 		}
 	else:
 
 		# Kosongkan hasil dan jalankan servis
-		RESULTS[spider_name] = []
-		_crawling(spider_name, category, date, total)
+		RESULTS[nama_spider] = []
+		_crawling(nama_spider, kategori, tanggal, jumlah)
 
 		# Buat status spider menjadi bekerja
-		WORKING[spider_name] = True
-		FINISH[spider_name] = False
+		WORKING[nama_spider] = True
+		FINISH[nama_spider] = False
 
 		return {
-			"status": "accepted",
-			"message": "task successfully assign to '{s}' spider".format(s=spider_name)
+			"status": "diterima",
+			"pesan": "tugas diterima oleh '{s}' spider".format(s=nama_spider)
 		}
 
 # Servis untuk memulai proses scraping oleh spider
 @crochet.run_in_reactor
-def _crawling(spider_name, category, date, total):
+def _crawling(nama_spider, kategori, tanggal, jumlah):
 	global SPIDER_LIST
 
 	# Pengaturan path ke settings scrapy
@@ -71,42 +71,42 @@ def _crawling(spider_name, category, date, total):
 	
 	# Konfigurasi dan insiasi argumen spider
 	s = get_project_settings()
-	s.update({
-			"CLOSESPIDER_ITEMCOUNT": total,
+	s.uptanggal({
+			"CLOSESPIDER_ITEMCOUNT": jumlah,
 		})
 
 	# Konfigurasi spider dan event-loop
-	spider = SPIDER_LIST[spider_name]
+	spider = SPIDER_LIST[nama_spider]
 	crawler = Crawler(spider, s)
 	dispatcher.connect(_store_data, signal=signals.item_scraped)
 	dispatcher.connect(_work_finish, signal=signals.spider_closed)
 
 	# Menjalankan event
 	runner = CrawlerRunner(s)
-	event = runner.crawl(spider, category=category, date=date)
+	event = runner.crawl(spider, kategori=kategori, tanggal=tanggal)
 
 # Fungsi menyimpan hasil scraping
 def _store_data(item, response, spider):
 	global RESULTS
 
-	spider_name = spider.name
-	RESULTS[spider_name].append(dict(item))
+	nama_spider = spider.name
+	RESULTS[nama_spider].append(dict(item))
 
 # Fungsi alarm ketika spider telah selesai
 def _work_finish(spider):
 	global WORKING
 	global FINISH
 
-	spider_name = spider.name
+	nama_spider = spider.name
 
 	# Membuat kondisi selesai dari spider
-	WORKING[spider_name] = False
-	FINISH[spider_name] = True
+	WORKING[nama_spider] = False
+	FINISH[nama_spider] = True
 
 ###############################################################
 
 # SERVICE EKSTRAKSI HASIL
-def extract_results(spider_name):
+def extract_results(nama_spider):
 	global RESULTS
 	global WORKING
 	global FINISH
@@ -114,19 +114,18 @@ def extract_results(spider_name):
 	# Jika spider bekerja, kembalikan pesan spider sibuk
 	# Jika spider selesai, kembalikan hasil scraping
 	# Selainnya, kembalikan pesan spider sedang tidak bekerja
-	if (WORKING[spider_name]):
+	if (WORKING[nama_spider]):
 		return {
-			"status": "busy",
-			"message": "'{s}' spider is still working".format(s=spider_name),
+			"status": "ditolak",
+			"message": "'{s}' spider masih bekerja".format(s=nama_spider),
 		}
-	elif (FINISH[spider_name]):
+	elif (FINISH[nama_spider]):
 		return {
-			"status": "accepted",
-			"spider": spider_name,
-			"data": RESULTS[spider_name],
+			"spider": nama_spider,
+			"data": RESULTS[nama_spider],
 		}
 	else:
 		return {
-			"status": "denied",
-			"message": "'{s}' spider doesn't have any job".format(s=spider_name),
+			"status": "ditolak",
+			"message": "'{s}' spider tidak memiliki pekerjaan".format(s=nama_spider),
 		}

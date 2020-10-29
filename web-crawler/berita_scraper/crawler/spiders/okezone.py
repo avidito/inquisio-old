@@ -58,8 +58,8 @@ class OkezoneSpider(CrawlSpider):
     # METHOD INISIASI
 	def __init__(self, *a, **kw):
 		super(OkezoneSpider, self).__init__(*a, **kw)
-		self.kategori = kw.get("category", "1")
-		self.tanggal = kw.get("date", datetime.now().strftime("%Y/%m/%d"))
+		self.kategori = kw.get("kategori", "1")
+		self.tanggal = kw.get("tanggal", datetime.now().strftime("%Y/%m/%d"))
 		for i in range(len(self.start_urls)):
 			url = self.start_urls[i]
 			self.start_urls[i] = url + "/bydate/channel/{t}/{k}".format(k=self.kategori, t=self.tanggal)

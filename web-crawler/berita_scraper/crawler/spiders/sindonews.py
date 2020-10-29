@@ -41,8 +41,8 @@ class SindonewsSpider(CrawlSpider):
     # METHOD INISIASI
 	def __init__(self, *a, **kw):
 		super(SindonewsSpider, self).__init__(*a, **kw)
-		self.kategori = kw.get("category", "0")
-		self.tanggal = kw.get("date", datetime.now().strftime("%Y-%m-%d"))
+		self.kategori = kw.get("kategori", "0")
+		self.tanggal = kw.get("tanggal", datetime.now().strftime("%Y-%m-%d"))
 		for i in range(len(self.start_urls)):
 			url = self.start_urls[i]
 			self.start_urls[i] = url + "{k}?t={t}".format(k=self.kategori, t=self.tanggal)
