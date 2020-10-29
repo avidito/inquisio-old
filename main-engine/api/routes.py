@@ -1,7 +1,12 @@
 from flask import jsonify, request
 
 from api import app
-from api.models import Manager, Tugas
+from api.models import Manager, Tugas, Hasil
+from api.serializers import ManagerSchema, TugasSchema, HasilSchema
+
+dm_schema = ManagerSchema(many=True)
+dt_schema = TugasSchema(many=True)
+dh_schema = HasilSchema(many=True)
 
 # Main Engine - Scheduler
 # API untuk memasukan task dalam penjadwalan
@@ -38,3 +43,40 @@ def workshop():
 			"status": "diterima",
 			"pesan": "hasil berhasil diterima",
 		})
+
+####################### UTILITY #######################
+
+utility = {
+		"manager": (Manager, dm_schema),
+		"tugas": (Tugas, dt_schema),
+		"hasil": (Hasil, dh_schema),
+	}
+
+# Cek Tabel
+@app.route("/api/cek", methods=["GET"])
+def cek_tabel():
+	nama = request.args.get("tabel")
+	t, s = utility[nama]
+
+	return s.jsonify(t.query.all())
+
+# Reset Tabel
+@app.route("/api/reset", methods=["DELETE"])
+def reset_tabel():
+	nama = request.arts.get("tabel")
+	t = utility[nama][0]
+	
+	if(nama == "manager"):
+		daftar_manager = t.query.all()
+		for manager in daftar_manager:
+			manager.status = "siap"
+	else:
+		daftar = t.query.all()
+		for data in daftar:
+			db.session.delete(data)
+
+	db.session.commit()
+	return jsonify({
+			"pesan": "tabel {} sudah di-reset".format(nama)
+		})
+		
