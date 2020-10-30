@@ -64,7 +64,7 @@ def ordering(perintah_id=None, manager_id=None):
 		manager = Manager.query.get(manager_id)
 		d_perintah = manager.penugasan
 
-		# Mendapatkan Perintah pertama dengan status "menunggu"
+		# Mendapatkan Perintah pertama yang belum ditugaskan
 		# Jika tidak ada data, abaikan penugasan
 		if (len(d_perintah)):
 			perintah = [p for p in d_perintah if not (p.ditugaskan)][0]

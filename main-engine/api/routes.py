@@ -2,6 +2,7 @@
 from flask import jsonify, request
 
 # Modul Utilitas
+import requests
 from datetime import datetime
 from pytz import timezone
 
@@ -17,7 +18,7 @@ from api.services import planning, ordering
 @app.route("/api/schedule", methods=["POST"])
 def scheduler():
 
-	# Mendapatkan data
+	# Mendapatkan argumen
 	kategori = request.json.get("kategori")
 	tanggal = request.json.get("tanggal")
 	jumlah =  request.json.get("jumlah")
@@ -51,7 +52,7 @@ def observer():
 @app.route("/api/observe", methods=["PUT"])
 def observer_put():
 
-	# Mendapatkan data
+	# Mendapatkan argumen
 	tugas_id = request.json.get("tugas_id")
 	manager_id = request.json.get("manager_id")
 
@@ -63,19 +64,33 @@ def observer_put():
 
 	return jsonify({
 			"status": "diterima",
-			"status": "status tugas {} dan manager {} berhasil diubah menjadi 'diproses'".format(tugas_id, manager_id)
+			"pesan": "status tugas {} dan manager {} berhasil diubah menjadi 'diproses'".format(tugas_id, manager_id)
 		})
 
 # Main Engine - Workshop
 # API untuk mengolah data hasil scraping
-# Argumen : tugas_id, data
+# Argumen : tugas_id, manager_id, data
 @app.route("/api/workshop", methods=["POST"])
 def workshop():
+
+	# Mendapatkan argumen
+	tugas_id = request.json.get("tugas_id")
+	manager_id = request.json.get("manager_id")
+	data = request.json.get("data")
+
+	# PUT Request ke observer_put
+	tm_data = {
+		"tugas_id": tugas_id,
+		"manager_id": manager_id,
+	}
+	feedback = requests.put(url="http://localhost:5100/api/observe", json=tm_data)
+
 	return jsonify({
 			"status": "diterima",
 			"pesan": "hasil berhasil diterima",
 		})
 
+####################### UTILITAS #######################
 
 # Fungsi untuk Merubah Status
 def change_status(**kwargs):
