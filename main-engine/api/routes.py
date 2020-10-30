@@ -3,10 +3,12 @@ from flask import jsonify, request
 
 # Modul Utilitas
 from datetime import datetime
+from pytz import timezone
 
 # Modul Projek
-from api import app
-from api.services import planning
+from api import app, db
+from api.models import Tugas, Manager
+from api.services import planning, ordering
 
 
 # Main Engine - Scheduler
@@ -15,17 +17,19 @@ from api.services import planning
 @app.route("/api/schedule", methods=["POST"])
 def scheduler():
 
+	# Mendapatkan data
 	kategori = request.json.get("kategori")
 	tanggal = request.json.get("tanggal")
 	jumlah =  request.json.get("jumlah")
 
+	# Melakukan penjadwalan tugas
 	planning(kategori, tanggal, jumlah)
 	return jsonify({
 			"status": "diterima",
 			"pesan": "tugas berhasil diterima",
 		})
 
-# Main Engine - Observer
+# Main Engine - Observer (GET)
 # API untuk mendapatkan status pengerjaan 
 # Argumen : _id
 @app.route("/api/observe", methods=["GET"])
@@ -41,6 +45,27 @@ def observer():
 			}
 		})
 
+# Main Engine - Observer (PUT)
+# API untuk merubah status pengerjaan 
+# Argumen : tugas_id, manager_id
+@app.route("/api/observe", methods=["PUT"])
+def observer_put():
+
+	# Mendapatkan data
+	tugas_id = request.json.get("tugas_id")
+	manager_id = request.json.get("manager_id")
+
+	# Merubah status tugas dan manager
+	change_status(tugas_id=tugas_id, manager_id=manager_id, status="diproses")
+
+	# Melakukan penugasan dengan manager_id
+	ordering(manager_id=manager_id)
+
+	return jsonify({
+			"status": "diterima",
+			"status": "status tugas {} dan manager {} berhasil diubah menjadi 'diproses'".format(tugas_id, manager_id)
+		})
+
 # Main Engine - Workshop
 # API untuk mengolah data hasil scraping
 # Argumen : tugas_id, data
@@ -51,9 +76,37 @@ def workshop():
 			"pesan": "hasil berhasil diterima",
 		})
 
+
+# Fungsi untuk Merubah Status
+def change_status(**kwargs):
+	
+	# Mengambil data tugas dan status
+	tugas_id = kwargs.get("tugas_id")
+	tugas = Tugas.query.get(tugas_id)
+	status = kwargs.get("status")
+
+	# Jika status akan diubah menjadi "diproses", ubah informasi tugas dan manager
+	# Jika status akan diubah menjadi "selesai", ubah informasi tugas saja
+	# Memasukan timestamps sesuai kategori status
+	waktu_sekarang = datetime.now(timezone("Asia/Jakarta"))
+	if (status == "diproses"):
+		tugas.waktu_diproses = waktu_sekarang
+
+		# Mengubah status manager
+		manager_id = kwargs.get("manager_id")
+		manager = Manager.query.get(manager_id)
+		manager.status = "siap"
+
+	elif (status == "selesai"):
+		tugas.waktu_selesai = waktu_sekarang
+
+	# Merubah status tugas
+	tugas.status = status
+	db.session.commit()
+
 ####################### UTILITY #######################
-from api import db
-from api.models import Manager, Tugas, Hasil, Perintah
+
+from api.models import Hasil, Perintah
 from api.serializers import ManagerSchema, TugasSchema, HasilSchema, PerintahSchema
 
 dm_schema = ManagerSchema(many=True)

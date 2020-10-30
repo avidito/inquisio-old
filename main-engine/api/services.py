@@ -40,38 +40,55 @@ def planning(kategori, tanggal, jumlah):
 	db.session.commit()
 
 	# Penugasan Manager
-	ordering(perintah._id)
+	ordering(perintah_id=perintah._id)
 
-# Service Ordering
+# Service Ordering - Perintah
 # Service yang melakukan pengecekan kesiapan dan penugasan Manager
-def ordering(perintah_id):
+def ordering(perintah_id=None, manager_id=None):
 
-	# Mendapatkan data Perintah dan Manager
-	perintah = Perintah.query.get(perintah_id)
-	manager = perintah.manager
+	# Jika menggunakan perintah_id
+	if (perintah_id):
 
-	# Jika Manager sedang "siap", berikan tugas
-	if (manager.status == "siap"):
+		# Mendapatkan data Perintah dan Manager
+		perintah = Perintah.query.get(perintah_id)
+		manager = perintah.manager
 
-		# Melakukan request ke Interpreter - Manager
-		tugas = perintah.tugas
-		tanggal_str = tugas.tanggal.strftime("%d/%m/%Y")
-		order = {
-			"kategori": tugas.kategori,
-			"tanggal": tanggal_str,
-			"jumlah": tugas.jumlah, 
-		}
-		feedback = requests.post(url=MANAGER_ENDPOINT, json=order)
+		# Jika Manager sedang "bekerja", abaikan penugasan
+		if (manager.status == "bekerja"):
+			return
 
-		# Mencatat Waktu dimulainya pekerjaan
-		waktu_sekarang = datetime.now(timezone("Asia/Jakarta"))
-		tugas.waktu_dikerjakan = waktu_sekarang
+	# Jika menggunakan manager_id
+	elif (manager_id):
 
-		# Merubah Status Manager, Tugas, dan Perintah
-		manager.status = "bekerja"
-		tugas.status = "dikerjakan"
-		perintah.ditugaskan = True
+		# Mendapatkan data Manager dan Perintah
+		manager = Manager.query.get(manager_id)
+		d_perintah = manager.penugasan
 
-		db.session.commit()
+		# Mendapatkan Perintah pertama dengan status "menunggu"
+		# Jika tidak ada data, abaikan penugasan
+		if (len(d_perintah)):
+			perintah = [p for p in d_perintah if not (p.ditugaskan)][0]
+		else:
+			return
 
+	# Melakukan request ke Interpreter - Manager
+	tugas = perintah.tugas
+	tanggal_str = tugas.tanggal.strftime("%d/%m/%Y")
+	order = {
+		"kategori": tugas.kategori,
+		"tanggal": tanggal_str,
+		"jumlah": tugas.jumlah, 
+	}
+	feedback = requests.post(url=MANAGER_ENDPOINT, json=order)
+
+	# Mencatat Waktu dimulainya pekerjaan
+	waktu_sekarang = datetime.now(timezone("Asia/Jakarta"))
+	tugas.waktu_dikerjakan = waktu_sekarang
+
+	# Merubah Status Manager, Tugas, dan Perintah
+	manager.status = "bekerja"
+	tugas.status = "dikerjakan"
+	perintah.ditugaskan = True
+
+	db.session.commit()
 
