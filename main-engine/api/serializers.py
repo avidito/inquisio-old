@@ -15,7 +15,7 @@ class ManagerSchema(ma.Schema):
 class TugasSchema(ma.Schema):
 	class Meta:
 		ordered = True
-		fields = ("_id", "kategori", "tanggal", "jumlah", "praproses")
+		fields = ("_id", "kategori", "tanggal", "jumlah", "praproses", "status")
 	
 	tanggal = fields.DateTime("%d/%m/%Y", datakey="tanggal")
 
@@ -23,7 +23,7 @@ class TugasSchema(ma.Schema):
 class PerintahSchema(ma.Schema):
 	class Meta:
 		ordered = True
-		fields = ("_id", "tugas_id", "manager_id")
+		fields = ("_id", "tugas_id", "manager_id", "ditugaskan")
 
 # Serializer Hasil
 class HasilSchema(ma.Schema):

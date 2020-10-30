@@ -43,9 +43,13 @@ class Perintah(db.Model):
 	_id = db.Column(db.Integer, primary_key=True)
 	tugas_id = db.Column(db.Integer, db.ForeignKey("tugas._id"), nullable=False)
 	manager_id = db.Column(db.Integer, db.ForeignKey("manager._id"), nullable=False)
+	ditugaskan = db.Column(db.Boolean, nullable=False)
 
 	tugas = db.relationship("Tugas", backref="penugasan", lazy=True)
 	manager = db.relationship("Manager", backref="penugasan", lazy=True)
+
+	def __repr__(self):
+		return "Perintah({}, {}, {})".format(self._id, self.tugas_id, self.manager_id)
 
 # Tabel Penyimpanan Data untuk Diproses
 class Hasil(db.Model):
