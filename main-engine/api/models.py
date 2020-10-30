@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from sqlalchemy_mutable import MutableList 
+
 from api import db
 
 
@@ -27,7 +29,7 @@ class Tugas(db.Model):
 	waktu_diproses = db.Column(db.DateTime)
 	waktu_selesai = db.Column(db.DateTime)
 	status = db.Column(db.String(10), nullable=False, default="menunggu")
-	praproses = db.Column(db.String(10), default='-')
+	praproses = db.Column(MutableList.as_mutable(db.PickleType))
 
 	hasil = db.relationship("Hasil", backref="tugas", lazy=True)
 
@@ -52,7 +54,7 @@ class Hasil(db.Model):
 	tugas_id = db.Column(db.Integer, db.ForeignKey("tugas._id"), nullable=False)
 	
 	spider = db.Column(db.String(20), nullable=False)
-	data = db.Column(db.String(100), nullable=False)
+	data = db.Column(MutableList.as_mutable(db.PickleType))
 
 	def __repr__(self):
 		return "Hasil({}, tugas={}, {})".format(self._id, self.tugas_id, self.spider)
