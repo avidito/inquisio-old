@@ -10,6 +10,8 @@ from api.preprocessing import Preprocessing
 
 # Endpoint Interpreter
 MANAGER_ENDPOINT = "http://localhost:5050/api/order"
+LOGGER_ENDPOINT = "http://localhost:5050/api/log"
+
 
 
 # Service Planning
@@ -92,6 +94,37 @@ def ordering(perintah_id=None, manager_id=None):
 	perintah.ditugaskan = True
 
 	db.session.commit()
+
+# Service Gather Info
+# Service untuk mendapatkan informasi dan catatan dari tugas
+def gather_info(tugas_id):
+
+	# Mendapatkan objek tugas dan status
+	tugas = Tugas.query.get_or_404(tugas_id)
+	status = tugas.status
+
+	# Mendapatkan informasi daftar waktu
+	waktu = {
+		"waktu_diterima": tugas.waktu_diterima,
+		"waktu_dikerjakan": tugas.waktu_dikerjakan,
+		"waktu_diproses": tugas.waktu_diproses,
+		"waktu_selesai": tugas.waktu_selesai,
+	}
+
+	# Mendapatkan informasi daftar catatan dari interpreter
+	catatan = []
+	for perintah in tugas.penugasan:
+		perintah_id = perintah._id
+		req = requests.get(url=LOGGER_ENDPOINT, params={"id": tugas_id})
+		catatan.extend(req.json())
+
+	# Menggabungkan informasi
+	info = {
+		"status": status,
+		"waktu": waktu,
+		"catatan": catatan,
+	}
+	return info
 
 # Service Parsing
 # Service untuk melakukan pengolahan data hasil scraping

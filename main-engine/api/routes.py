@@ -9,7 +9,7 @@ from pytz import timezone
 # Modul Projek
 from api import app, db
 from api.models import Tugas, Manager, Perintah
-from api.services import planning, ordering, parsing
+from api.services import planning, ordering, parsing, gather_info
 
 
 # Main Engine - Scheduler
@@ -43,16 +43,10 @@ def scheduler():
 # Argumen : _id
 @app.route("/api/observe", methods=["GET"])
 def observer():
-	return jsonify({
-			"id": 1,
-			"status": "working",
-			"waktu": {
-				"diterima": "29-10-2020",
-			},
-			"catatan": {
-				"status": "dikerjakan"
-			}
-		})
+	_id = request.args.get("id")
+	info = gather_info(_id)
+
+	return jsonify(info)
 
 # Main Engine - Observer (PUT)
 # API untuk merubah status pengerjaan 
