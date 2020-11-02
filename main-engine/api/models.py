@@ -31,8 +31,6 @@ class Tugas(db.Model):
 	status = db.Column(db.String(10), nullable=False, default="menunggu")
 	praproses = db.Column(MutableList.as_mutable(db.PickleType))
 
-	hasil = db.relationship("Hasil", backref="tugas", lazy=True)
-
 	def __repr__(self):
 		tgl = self.tanggal.strftime("%d/%m/%Y")
 		return "Tugas({}, {}, {}, {})".format(self._id, self.kategori, tgl, self.jumlah)
@@ -55,10 +53,11 @@ class Perintah(db.Model):
 class Hasil(db.Model):
 
 	_id = db.Column(db.Integer, primary_key=True)
-	tugas_id = db.Column(db.Integer, db.ForeignKey("tugas._id"), nullable=False)
-	
-	spider = db.Column(db.String(20), nullable=False)
+	perintah_id = db.Column(db.Integer, db.ForeignKey("perintah._id"), nullable=False)
+
 	data = db.Column(MutableList.as_mutable(db.PickleType))
 
+	perintah = db.relationship("Perintah", backref="hasil", lazy=True)
+
 	def __repr__(self):
-		return "Hasil({}, tugas={}, {})".format(self._id, self.tugas_id, self.spider)
+		return "Hasil({}, {})".format(self._id, self.perintah_id)

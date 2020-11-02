@@ -29,4 +29,4 @@ class PerintahSchema(ma.Schema):
 class HasilSchema(ma.Schema):
 	class Meta:
 		ordered = True
-		fields = ("_id", "tugas_id", "spider")
+		fields = ("_id", "perintah_id", "data")

@@ -5,19 +5,20 @@ import requests
 
 # Modul Projek
 from api import db
-from api.models import Tugas, Perintah, Manager
+from api.models import Tugas, Perintah, Manager, Hasil
+from api.preprocessing import Preprocessing
 
 # Endpoint Interpreter
 MANAGER_ENDPOINT = "http://localhost:5050/api/order"
 
+
 # Service Planning
 # Service untuk membuat masukan menjadi data Tugas
-def planning(kategori, tanggal, jumlah):
+def planning(kategori, tanggal, jumlah, praproses):
 	
 	# Penyesuaian format data masukan 
 	tanggal_dtime = datetime.strptime(tanggal, "%d/%m/%Y")
 	waktu_sekarang = datetime.now(timezone("Asia/Jakarta"))
-	praproses = ["tanpaSimbol", "bagiDenganTitik"]
 	
 	# Membuat data Tugas
 	tugas = Tugas(
@@ -42,7 +43,7 @@ def planning(kategori, tanggal, jumlah):
 	# Penugasan Manager
 	ordering(perintah_id=perintah._id)
 
-# Service Ordering - Perintah
+# Service Ordering
 # Service yang melakukan pengecekan kesiapan dan penugasan Manager
 def ordering(perintah_id=None, manager_id=None):
 
@@ -62,12 +63,12 @@ def ordering(perintah_id=None, manager_id=None):
 
 		# Mendapatkan data Manager dan Perintah
 		manager = Manager.query.get(manager_id)
-		d_perintah = manager.penugasan
+		d_perintah = [p for p in manager.penugasan if not (p.ditugaskan)]
 
 		# Mendapatkan Perintah pertama yang belum ditugaskan
 		# Jika tidak ada data, abaikan penugasan
 		if (len(d_perintah)):
-			perintah = [p for p in d_perintah if not (p.ditugaskan)][0]
+			perintah = d_perintah[0]
 		else:
 			return
 
@@ -92,3 +93,22 @@ def ordering(perintah_id=None, manager_id=None):
 
 	db.session.commit()
 
+# Service Parsing
+# Service untuk melakukan pengolahan data hasil scraping
+def parsing(perintah_id, data):
+
+	# Mendapatkan informasi parproses dari Perintah
+	perintah = Perintah.query.get(perintah_id)
+	praproses = perintah.tugas.praproses
+
+	# Memulai praproses untuk pada data
+	prep = Preprocessing(praproses)
+	rdata = prep(data)
+
+	# Menyimpan hasil yang telah diolah ke tabel Hasil
+	hasil = Hasil(
+			perintah_id = perintah_id,
+			data = rdata,
+		)
+	db.session.add(hasil)
+	db.session.commit()

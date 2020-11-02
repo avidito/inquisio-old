@@ -8,8 +8,8 @@ from pytz import timezone
 
 # Modul Projek
 from api import app, db
-from api.models import Tugas, Manager
-from api.services import planning, ordering
+from api.models import Tugas, Manager, Perintah
+from api.services import planning, ordering, parsing
 
 
 # Main Engine - Scheduler
@@ -22,9 +22,17 @@ def scheduler():
 	kategori = request.json.get("kategori")
 	tanggal = request.json.get("tanggal")
 	jumlah =  request.json.get("jumlah")
+	praproses = [
+		{
+			"nama": "Hapus Simbol",
+			"parameter": {
+				"simbol" : "()"
+			}
+		}
+	]
 
 	# Melakukan penjadwalan tugas
-	planning(kategori, tanggal, jumlah)
+	planning(kategori, tanggal, jumlah, praproses)
 	return jsonify({
 			"status": "diterima",
 			"pesan": "tugas berhasil diterima",
@@ -53,8 +61,10 @@ def observer():
 def observer_put():
 
 	# Mendapatkan argumen
-	tugas_id = request.json.get("tugas_id")
-	manager_id = request.json.get("manager_id")
+	perintah_id = request.json.get("perintah_id")
+	perintah = Perintah.query.get(perintah_id)
+	tugas_id = perintah.tugas_id
+	manager_id = perintah.manager_id
 
 	# Merubah status tugas dan manager
 	change_status(tugas_id=tugas_id, manager_id=manager_id, status="diproses")
@@ -69,21 +79,20 @@ def observer_put():
 
 # Main Engine - Workshop
 # API untuk mengolah data hasil scraping
-# Argumen : tugas_id, manager_id, data
+# Argumen : perintah_id, data
 @app.route("/api/workshop", methods=["POST"])
 def workshop():
 
 	# Mendapatkan argumen
-	tugas_id = request.json.get("tugas_id")
-	manager_id = request.json.get("manager_id")
+	perintah_id = request.json.get("perintah_id")
 	data = request.json.get("data")
 
 	# PUT Request ke observer_put
-	tm_data = {
-		"tugas_id": tugas_id,
-		"manager_id": manager_id,
-	}
-	feedback = requests.put(url="http://localhost:5100/api/observe", json=tm_data)
+	perintah = Perintah.query.get(perintah_id)
+	feedback = requests.put(url="http://localhost:5100/api/observe", json={"perintah_id": perintah_id})
+
+	# Parsing data masukan sesuai praproses yang diinginkan
+	parsing(perintah_id, data)
 
 	return jsonify({
 			"status": "diterima",
@@ -121,7 +130,7 @@ def change_status(**kwargs):
 
 ####################### UTILITY #######################
 
-from api.models import Hasil, Perintah
+from api.models import Hasil
 from api.serializers import ManagerSchema, TugasSchema, HasilSchema, PerintahSchema
 
 dm_schema = ManagerSchema(many=True)
@@ -162,4 +171,34 @@ def reset_tabel():
 	db.session.commit()
 	return jsonify({
 			"pesan": "tabel {} sudah di-reset".format(nama)
+		})
+
+# Trigger workshop
+@app.route("/api/trigger", methods=["GET"])
+def trigger_ws():
+	perintah_id = request.args.get("perintah_id")
+
+	dummy = [
+		{
+			"judul": "berita satu",
+			"tanggal": "20/10/2020",
+			"tags": ["a", "b", "c"],
+			"isi": "isinya ceritanya () panjang!"
+		},
+		{
+			"judul": "berita dua",
+			"tanggal": "20/10/2020",
+			"tags": ["a", "b"],
+			"isi": "isinya lebih. panjang lagi."
+		}
+	]
+
+	jdata = {
+		"perintah_id": perintah_id,
+		"data" : dummy,
+	}
+	feedback = requests.post(url="http://localhost:5100/api/workshop", json=jdata)
+
+	return jsonify({
+			"status": "berhasil",
 		})
