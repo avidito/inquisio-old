@@ -8,7 +8,7 @@ from pytz import timezone
 
 # Modul Projek
 from api import app, db
-from api.services import planning, ordering, parsing, change_status, gather_info
+from api.services import planning, ordering, parsing, change_status, gather_info, get_result
 
 
 # Main Engine - Scheduler
@@ -42,6 +42,22 @@ def observer():
 
 	return jsonify(info)
 
+# Main Engine - Result (GET)
+# API untuk mendapatkan hasil scraping 
+# Argumen : tugas_id
+@app.route("/api/result", methods=["GET"])
+def result():
+	tugas_id = request.args.get("tugas_id")
+	hasil = get_result(tugas_id)
+
+	if (hasil):
+		return dh_schema.jsonify(hasil)
+	else:
+		return jsonify({
+			"status": "ditolak",
+			"pesan": "data belum tersedia"
+		})
+
 # Main Engine - Workshop
 # API untuk mengolah data hasil scraping
 # Argumen : tugas_id, data
@@ -53,13 +69,13 @@ def workshop():
 	data = request.json.get("data")
 
 	# Merubah status tugas dan manager
-	# change_status(tugas_id, "diproses")
+	change_status(tugas_id, "diproses")
 
 	# Melakukan penugasan dengan manager_id
-	# ordering(tugas_id, "workshop")
+	ordering(tugas_id, "workshop")
 
 	# PUT Request ke observer_put
-	# feedback = requests.put(url="http://localhost:5100/api/observe", json={"tugas_id": tugas_id})
+	feedback = requests.put(url="http://localhost:5100/api/observe", json={"tugas_id": tugas_id})
 
 	# Parsing data masukan sesuai praproses yang diinginkan
 	parsing(tugas_id, data)

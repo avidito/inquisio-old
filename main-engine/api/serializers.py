@@ -23,4 +23,4 @@ class TugasSchema(ma.Schema):
 class HasilSchema(ma.Schema):
 	class Meta:
 		ordered = True
-		fields = ("_id", "perintah_id", "data")
+		fields = ("tugas_id", "data")

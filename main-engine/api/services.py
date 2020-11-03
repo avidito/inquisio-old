@@ -103,6 +103,15 @@ def gather_info(tugas_id):
 	}
 	return info
 
+# Service Get Result
+# Service untuk mendapatkan hasil web-scraping
+def get_result(tugas_id):
+
+	# Mengambil seluruh data berdasarkan tugas_id
+	hasil = Hasil.query.filter_by(tugas_id=tugas_id).all()
+
+	return hasil
+
 # Fungsi untuk Merubah Status
 def change_status(tugas_id, status):
 	
