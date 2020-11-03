@@ -19,12 +19,6 @@ class TugasSchema(ma.Schema):
 	
 	tanggal = fields.DateTime("%d/%m/%Y", datakey="tanggal")
 
-# Serializer Perintah
-class PerintahSchema(ma.Schema):
-	class Meta:
-		ordered = True
-		fields = ("_id", "tugas_id", "manager_id", "ditugaskan")
-
 # Serializer Hasil
 class HasilSchema(ma.Schema):
 	class Meta:

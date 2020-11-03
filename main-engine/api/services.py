@@ -5,7 +5,7 @@ import requests
 
 # Modul Projek
 from api import db
-from api.models import Tugas, Perintah, Manager, Hasil
+from api.models import Tugas, Manager, Hasil
 from api.preprocessing import Preprocessing
 
 # Endpoint Interpreter
@@ -13,10 +13,9 @@ MANAGER_ENDPOINT = "http://localhost:5050/api/order"
 LOGGER_ENDPOINT = "http://localhost:5050/api/log"
 
 
-
 # Service Planning
 # Service untuk membuat masukan menjadi data Tugas
-def planning(kategori, tanggal, jumlah, praproses):
+def planning(manager_id, kategori, tanggal, jumlah, praproses):
 	
 	# Penyesuaian format data masukan 
 	tanggal_dtime = datetime.strptime(tanggal, "%d/%m/%Y")
@@ -24,6 +23,7 @@ def planning(kategori, tanggal, jumlah, praproses):
 	
 	# Membuat data Tugas
 	tugas = Tugas(
+			manager_id = manager_id,
 			kategori = kategori,
 			tanggal = tanggal_dtime,
 			jumlah = jumlah,
@@ -33,56 +33,37 @@ def planning(kategori, tanggal, jumlah, praproses):
 	db.session.add(tugas)
 	db.session.commit()
 
-	# Membuat data Perintah
-	perintah = Perintah(
-			tugas_id = tugas._id,
-			manager_id = 1,
-			ditugaskan = False,
-		)
-	db.session.add(perintah)
-	db.session.commit()
-
-	# Penugasan Manager
-	ordering(perintah_id=perintah._id)
+	# Penugasan ke Manager
+	ordering(tugas._id, "planning")
 
 # Service Ordering
 # Service yang melakukan pengecekan kesiapan dan penugasan Manager
-def ordering(perintah_id=None, manager_id=None):
+def ordering(tugas_id, sender):
 
-	# Jika menggunakan perintah_id
-	if (perintah_id):
+	# Mendapatkan data Tugas dan Manager
+	tugas = Tugas.query.get(tugas_id)
+	manager = tugas.manager
 
-		# Mendapatkan data Perintah dan Manager
-		perintah = Perintah.query.get(perintah_id)
-		manager = perintah.manager
+	# Jika pengirim dari "workshop", dapatkan tugas yang belum dikerjakan
+	# dari dengan manager yang sama
+	if(sender == "workshop"):
+		tugas = Tugas.query.filter_by(manager_id=manager._id, status="menunggu").first()
 
-		# Jika Manager sedang "bekerja", abaikan penugasan
-		if (manager.status == "bekerja"):
-			return
+	# Jika manager dalam status siap dan terdapat tugas, berikan penugasan
+	# Selainnya abaikan penugasan
+	if (manager.status == "siap" and tugas):
+		tanggal_str = tugas.tanggal.strftime("%d/%m/%Y")
+		order = {
+			"tugas_id": tugas_id,
+			"kategori": tugas.kategori,
+			"tanggal": tanggal_str,
+			"jumlah": tugas.jumlah,
+		}
 
-	# Jika menggunakan manager_id
-	elif (manager_id):
-
-		# Mendapatkan data Manager dan Perintah
-		manager = Manager.query.get(manager_id)
-		d_perintah = [p for p in manager.penugasan if not (p.ditugaskan)]
-
-		# Mendapatkan Perintah pertama yang belum ditugaskan
-		# Jika tidak ada data, abaikan penugasan
-		if (len(d_perintah)):
-			perintah = d_perintah[0]
-		else:
-			return
-
-	# Melakukan request ke Interpreter - Manager
-	tugas = perintah.tugas
-	tanggal_str = tugas.tanggal.strftime("%d/%m/%Y")
-	order = {
-		"kategori": tugas.kategori,
-		"tanggal": tanggal_str,
-		"jumlah": tugas.jumlah, 
-	}
-	feedback = requests.post(url=MANAGER_ENDPOINT, json=order)
+		# Mengirimkan tugas ke Manager
+		feedback = requests.post(url=MANAGER_ENDPOINT, json=order)
+	else:
+		return
 
 	# Mencatat Waktu dimulainya pekerjaan
 	waktu_sekarang = datetime.now(timezone("Asia/Jakarta"))
@@ -91,7 +72,6 @@ def ordering(perintah_id=None, manager_id=None):
 	# Merubah Status Manager, Tugas, dan Perintah
 	manager.status = "bekerja"
 	tugas.status = "dikerjakan"
-	perintah.ditugaskan = True
 
 	db.session.commit()
 
@@ -112,11 +92,8 @@ def gather_info(tugas_id):
 	}
 
 	# Mendapatkan informasi daftar catatan dari interpreter
-	catatan = []
-	for perintah in tugas.penugasan:
-		perintah_id = perintah._id
-		req = requests.get(url=LOGGER_ENDPOINT, params={"id": tugas_id})
-		catatan.extend(req.json())
+	req = requests.get(url=LOGGER_ENDPOINT, params={"tugas_id": tugas_id})
+	catatan = req.json()
 
 	# Menggabungkan informasi
 	info = {
@@ -126,22 +103,41 @@ def gather_info(tugas_id):
 	}
 	return info
 
+# Fungsi untuk Merubah Status
+def change_status(tugas_id, status):
+	
+	# Mengambil data Tugas dan merubah statusnya
+	tugas = Tugas.query.get(tugas_id)
+	tugas.status = status
+	
+	# Mencatat waktu perubahan sesuai status
+	# Jika status sama dengan "diproses", ubah status manager juga
+	waktu_sekarang = datetime.now(timezone("Asia/Jakarta"))
+	if (status == "diproses"):
+		tugas.waktu_diproses = waktu_sekarang
+		
+		manager = Mananger.query.get(tugas.manager_id)
+		manager.status = "siap"
+	else:
+		tugas.waktu_selesai = waktu_sekarang
+
+	db.session.commit()
+
 # Service Parsing
 # Service untuk melakukan pengolahan data hasil scraping
-def parsing(perintah_id, data):
+def parsing(tugas_id, data):
 
 	# Mendapatkan informasi parproses dari Perintah
-	perintah = Perintah.query.get(perintah_id)
-	praproses = perintah.tugas.praproses
+	praproses = Tugas.query.get(tugas_id).praproses
 
 	# Memulai praproses untuk pada data
-	prep = Preprocessing(praproses)
-	rdata = prep(data)
+	preprocessor = Preprocessing(praproses)
+	processed_data = preprocessor(data)
 
 	# Menyimpan hasil yang telah diolah ke tabel Hasil
 	hasil = Hasil(
-			perintah_id = perintah_id,
-			data = rdata,
+			tugas_id = tugas_id,
+			data = processed_data,
 		)
 	db.session.add(hasil)
 	db.session.commit()

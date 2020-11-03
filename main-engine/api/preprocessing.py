@@ -20,13 +20,15 @@ class Preprocessing:
 			self.pstr.append(process[1])
 			self.pcls.append(process[2])
 
-	def __call__(self, results):
-		data_list = [res["isi"] for res in results]
-
-		rdata = data_list.copy()
+	def __call__(self, data_list):
+		processed = [res["isi"] for res in data_list].copy()
 		for processor in self.pcls:
 			result = []
-			for data in rdata:
+			for data in processed:
 				result.append(processor(data))
-			rdata = result.copy()
-		return rdata
+			processed = result.copy()
+
+		for data, res in zip(data_list, processed):
+			data["isi"] = res
+
+		return data_list

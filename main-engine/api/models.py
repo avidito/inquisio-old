@@ -20,6 +20,7 @@ class Manager(db.Model):
 class Tugas(db.Model):
 
 	_id = db.Column(db.Integer, primary_key=True)
+	manager_id = db.Column(db.Integer, db.ForeignKey("manager._id"), nullable=False)
 
 	kategori = db.Column(db.String(20), nullable=False)
 	tanggal = db.Column(db.DateTime, nullable=False)
@@ -31,33 +32,21 @@ class Tugas(db.Model):
 	status = db.Column(db.String(10), nullable=False, default="menunggu")
 	praproses = db.Column(MutableList.as_mutable(db.PickleType))
 
+	manager = db.relationship("Manager", backref="tugas", lazy=True)
+
 	def __repr__(self):
 		tgl = self.tanggal.strftime("%d/%m/%Y")
 		return "Tugas({}, {}, {}, {})".format(self._id, self.kategori, tgl, self.jumlah)
-
-# Tabel Pencatatan Perintah untuk Interpreter
-class Perintah(db.Model):
-
-	_id = db.Column(db.Integer, primary_key=True)
-	tugas_id = db.Column(db.Integer, db.ForeignKey("tugas._id"), nullable=False)
-	manager_id = db.Column(db.Integer, db.ForeignKey("manager._id"), nullable=False)
-	ditugaskan = db.Column(db.Boolean, nullable=False)
-
-	tugas = db.relationship("Tugas", backref="penugasan", lazy=True)
-	manager = db.relationship("Manager", backref="penugasan", lazy=True)
-
-	def __repr__(self):
-		return "Perintah({}, {}, {})".format(self._id, self.tugas_id, self.manager_id)
 
 # Tabel Penyimpanan Data untuk Diproses
 class Hasil(db.Model):
 
 	_id = db.Column(db.Integer, primary_key=True)
-	perintah_id = db.Column(db.Integer, db.ForeignKey("perintah._id"), nullable=False)
+	tugas_id = db.Column(db.Integer, db.ForeignKey("tugas._id"), nullable=False)
 
 	data = db.Column(MutableList.as_mutable(db.PickleType))
-
-	perintah = db.relationship("Perintah", backref="hasil", lazy=True)
+	
+	tugas = db.relationship("Tugas", backref="hasil", lazy=True)
 
 	def __repr__(self):
-		return "Hasil({}, {})".format(self._id, self.perintah_id)
+		return "Hasil({}, {})".format(self._id, self.tugas_id)

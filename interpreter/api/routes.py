@@ -17,7 +17,7 @@ def api_log():
 	return jsonify ([
 			{
 				"_id": 1,
-				"perintah_id": 1,
+				"tugas_id": 1,
 				"waktu": "02/11/2020 16:40",
 				"spider": "kompas",
 				"status": "mulai",
@@ -25,7 +25,7 @@ def api_log():
 			},
 			{
 				"_id": 2,
-				"perintah_id": 1,
+				"tugas_id": 1,
 				"waktu": "02/11/2020 17:00",
 				"spider": "kompas",
 				"status": "selesai",
