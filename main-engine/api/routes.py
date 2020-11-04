@@ -5,6 +5,7 @@ from flask import jsonify, request
 import requests
 from datetime import datetime
 from pytz import timezone
+from multiprocessing import Process
 
 # Modul Projek
 from api import app, db
@@ -67,18 +68,14 @@ def workshop():
 	# Mendapatkan argumen
 	tugas_id = request.json.get("tugas_id")
 	data = request.json.get("data")
-
-	# Merubah status tugas dan manager
-	change_status(tugas_id, "diproses")
-
-	# Melakukan penugasan dengan manager_id
-	ordering(tugas_id, "workshop")
-
-	# PUT Request ke observer_put
-	feedback = requests.put(url="http://localhost:5100/api/observe", json={"tugas_id": tugas_id})
-
+	
 	# Parsing data masukan sesuai praproses yang diinginkan
-	parsing(tugas_id, data)
+	p1 = Process(target=parsing, args=(tugas_id, data))
+	p1.start()
+	
+	# Melakukan penugasan dengan manager_id
+	p2 = Process(target=ordering, args=(tugas_id, "workshop"))
+	p2.start()
 
 	return jsonify({
 			"status": "diterima",

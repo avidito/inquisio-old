@@ -2,6 +2,7 @@
 from datetime import datetime
 from pytz import timezone
 import requests
+from multiprocessing import Process
 
 # Modul Projek
 from api import db
@@ -33,8 +34,9 @@ def planning(manager_id, kategori, tanggal, jumlah, praproses):
 	db.session.add(tugas)
 	db.session.commit()
 
-	# Penugasan ke Manager
-	ordering(tugas._id, "planning")
+	# Penugasan ke Manager (Async)
+	p = Process(target=ordering, args=(tugas._id, "planning"))
+	p.start()
 
 # Service Ordering
 # Service yang melakukan pengecekan kesiapan dan penugasan Manager
@@ -119,13 +121,13 @@ def change_status(tugas_id, status):
 	tugas = Tugas.query.get(tugas_id)
 	tugas.status = status
 	
-	# Mencatat waktu perubahan sesuai status
+	# Mencatat waktu perubahan sesu		ai status
 	# Jika status sama dengan "diproses", ubah status manager juga
 	waktu_sekarang = datetime.now(timezone("Asia/Jakarta"))
 	if (status == "diproses"):
 		tugas.waktu_diproses = waktu_sekarang
 		
-		manager = Mananger.query.get(tugas.manager_id)
+		manager = Manager.query.get(tugas.manager_id)
 		manager.status = "siap"
 	else:
 		tugas.waktu_selesai = waktu_sekarang
@@ -135,6 +137,9 @@ def change_status(tugas_id, status):
 # Service Parsing
 # Service untuk melakukan pengolahan data hasil scraping
 def parsing(tugas_id, data):
+
+	# Merubah status tugas menjadi diproses
+	change_status(tugas_id, "diproses")
 
 	# Mendapatkan informasi parproses dari Perintah
 	praproses = Tugas.query.get(tugas_id).praproses
@@ -150,3 +155,6 @@ def parsing(tugas_id, data):
 		)
 	db.session.add(hasil)
 	db.session.commit()
+
+	# Merubah status tugas menjadi selesai
+	change_status(tugas_id, "selesai")
