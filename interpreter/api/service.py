@@ -5,7 +5,7 @@ from api import db
 from api.models import Catatan
 
 
-SPIDER_ENDPOINT = "http://localhost:5000/api/post/"
+SPIDER_ENDPOINT = "http://localhost:5000/api/spider"
 ME_ENDPOINT = "http://localhost:5000/api/get"
 
 spiders = json.load(open("api/map.json"))
@@ -19,35 +19,35 @@ current_id = -1
 
 
 
-def order_process(perintah_id, kategori, tanggal, jumlah):
+def order_process(tugas_id, kategori, tanggal, jumlah):
 
 	global SPIDER_ENDPOINT
 	global spider_counts
 	global list_spider
 	global current_id
 
-	current_id = perintah_id
+	current_id = tugas_id
 
 	for spider in spiders:
 		if spiders[spider]["kategori"].get(kategori):
 			spider_counts += 1
-			order_url = SPIDER_ENDPOINT + spiders[spider]["spider"]
 			order_data = {
+				"spider": spiders[spider]["spider"],
 				"kategori": spiders[spider]["kategori"][kategori],
 				"tanggal": datetime.strptime(tanggal, "%d%m%Y").strftime(spiders[spider]["tanggal"]),
 				"jumlah": jumlah
 			}
 
-			request_data = requests.post(url=order_url, json=order_data)
+			request_data = requests.post(url=SPIDER_ENDPOINT, json=order_data)
 			result = request_data.json()
 
 			if result["status"] == "ditolak":
 				spider_counts -= 1
 
 			data = Catatan(
-				perintah_id = perintah_id,
-				waktu = datetime.now(),
-				spider = spiders[spider]["spider"],
+				tugas_id = tugas_id,
+				waktu = datetime.now()
+,				spider = spiders[spider]["spider"],
 				status = result["status"],
 				pesan = result["pesan"]
 			)
@@ -71,7 +71,7 @@ def receiver_process(spider, data):
 	counter += 1
 
 	data = Catatan(
-		perintah_id = current_id,
+		tugas_id = current_id,
 		waktu = datetime.now(),
 		spider = spider,
 		status = "selesai",
@@ -83,7 +83,7 @@ def receiver_process(spider, data):
 
 	if counter == spider_counts:
 		receiver_data = {
-			"perintah_id": current_id,
+			"tugas_id": current_id,
 			"data": result_data
 		}
 

@@ -18,26 +18,26 @@ def index():
 @app.route("/api/order", methods=["POST"])
 def api_order():
 
-	perintah_id = request.json.get("perintah_id")
+	tugas_id = request.json.get("tugas_id")
 	kategori = request.json.get("kategori")
 	tanggal = request.json.get("tanggal")
 	jumlah = request.json.get("jumlah")
 
-	data = order_process(perintah_id, kategori, tanggal, jumlah)
+	data = order_process(tugas_id, kategori, tanggal, jumlah)
 
 	return jsonify ({
 			"status": "diterima",
-			"pesan": "perintah {} sedang dikerjakan".format(perintah_id)
+			"pesan": "perintah {} sedang dikerjakan".format(tugas_id)
 		})
 
 
 @app.route("/api/log", methods=["GET"])
 def api_log():
 
-	perintah_id = request.args.get("perintah_id")
+	tugas_id = request.args.get("tugas_id")
 
-	if perintah_id:
-		data = Catatan.query.filter_by(perintah_id=perintah_id).all()
+	if tugas_id:
+		data = Catatan.query.filter_by(tugas_id=tugas_id).all()
 		return catatan_schema.jsonify(data)
 
 
