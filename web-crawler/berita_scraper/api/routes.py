@@ -3,7 +3,7 @@ from flask import request, jsonify
 
 # Modul Projek
 from api import app
-from api.service import crawling, extract_results
+from api.services import crawling, extract_results
 
 
 # API untuk membuat Spider memulai proses crawling

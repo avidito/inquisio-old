@@ -26,11 +26,12 @@ def scheduler():
 	praproses = request.json.get("praproses")
 
 	# Melakukan penjadwalan tugas
-	planning(manager_id, kategori, tanggal, jumlah, praproses)
+	tugas_id = planning(manager_id, kategori, tanggal, jumlah, praproses)
 
 	return jsonify({
 			"status": "diterima",
 			"pesan": "tugas berhasil diterima",
+			"tugas_id": tugas_id,
 		})
 
 # Main Engine - Observer (GET)

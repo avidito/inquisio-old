@@ -6,7 +6,7 @@ from api.models import Catatan
 
 
 SPIDER_ENDPOINT = "http://localhost:5000/api/spider"
-ME_ENDPOINT = "http://localhost:5000/api/get"
+ME_ENDPOINT = "http://localhost:5100/api/workshop"
 
 spiders = json.load(open("api/map.json"))
 list_spider = []
@@ -19,7 +19,7 @@ current_id = -1
 
 
 
-def order_process(tugas_id, kategori, tanggal, jumlah):
+def mapping(tugas_id, kategori, tanggal, jumlah):
 
 	global SPIDER_ENDPOINT
 	global spider_counts
@@ -34,7 +34,7 @@ def order_process(tugas_id, kategori, tanggal, jumlah):
 			order_data = {
 				"spider": spiders[spider]["spider"],
 				"kategori": spiders[spider]["kategori"][kategori],
-				"tanggal": datetime.strptime(tanggal, "%d%m%Y").strftime(spiders[spider]["tanggal"]),
+				"tanggal": datetime.strptime(tanggal, "%d/%m/%Y").strftime(spiders[spider]["tanggal"]),
 				"jumlah": jumlah
 			}
 

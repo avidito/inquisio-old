@@ -10,8 +10,8 @@ from api.models import Tugas, Manager, Hasil
 from api.preprocessing import Preprocessing
 
 # Endpoint Interpreter
-MANAGER_ENDPOINT = "http://localhost:5050/api/order"
-LOGGER_ENDPOINT = "http://localhost:5050/api/log"
+MANAGER_ENDPOINT = "http://localhost:5050/api/manager"
+LOGGER_ENDPOINT = "http://localhost:5050/api/logger"
 
 
 # Service Planning
@@ -34,13 +34,16 @@ def planning(manager_id, kategori, tanggal, jumlah, praproses):
 	db.session.add(tugas)
 	db.session.commit()
 
-	# Penugasan ke Manager (Async)
-	p = Process(target=ordering, args=(tugas._id, "planning"))
-	p.start()
+	# Penugasan ke Manager
+	ordering(tugas._id, "planning")
+	
+	return tugas._id
 
 # Service Ordering
 # Service yang melakukan pengecekan kesiapan dan penugasan Manager
 def ordering(tugas_id, sender):
+	
+	global MANAGER_ENDPOINT
 
 	# Mendapatkan data Tugas dan Manager
 	tugas = Tugas.query.get(tugas_id)
@@ -63,7 +66,12 @@ def ordering(tugas_id, sender):
 		}
 
 		# Mengirimkan tugas ke Manager
-		feedback = requests.post(url=MANAGER_ENDPOINT, json=order)
+		kw = {
+			"url": MANAGER_ENDPOINT,
+			"json": order,
+		}
+		p = Process(target=requests.post, kwargs=kw)
+		p.start()
 	else:
 		return
 
@@ -80,6 +88,8 @@ def ordering(tugas_id, sender):
 # Service Gather Info
 # Service untuk mendapatkan informasi dan catatan dari tugas
 def gather_info(tugas_id):
+
+	global LOGGER_ENDPOINT
 
 	# Mendapatkan objek tugas dan status
 	tugas = Tugas.query.get_or_404(tugas_id)
