@@ -8,7 +8,7 @@ from api.service import crawling, extract_results
 
 # API untuk membuat Spider memulai proses crawling
 # Argumen : spider, kategori, tanggal, jumlah
-@app.route("/api/crawl/berita", methods=["POST"])
+@app.route("/api/spider", methods=["POST"])
 def spider_worker():
 	
 	# Jika ada argumen "spider", lakukan penugasan

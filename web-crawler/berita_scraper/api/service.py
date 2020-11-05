@@ -5,6 +5,8 @@ import os
 import crochet
 crochet.setup()
 
+import requests
+
 # Modul Scrapy
 from scrapy.utils.project import get_project_settings
 from scrapy.crawler import Crawler, CrawlerRunner
@@ -13,6 +15,9 @@ from scrapy.signalmanager import dispatcher
 
 # Modul Projek
 from crawler.spiders import detik, kompas, okezone, sindonews
+
+
+RECEIVER_ENDPOINT = "http://localhost:5050/api/receiver"
 
 # Inisiasi Variable Global Spider
 SPIDER_LIST = {
@@ -71,7 +76,7 @@ def _crawling(nama_spider, kategori, tanggal, jumlah):
 	
 	# Konfigurasi dan insiasi argumen spider
 	s = get_project_settings()
-	s.uptanggal({
+	s.update({
 			"CLOSESPIDER_ITEMCOUNT": jumlah,
 		})
 
@@ -102,6 +107,13 @@ def _work_finish(spider):
 	# Membuat kondisi selesai dari spider
 	WORKING[nama_spider] = False
 	FINISH[nama_spider] = True
+
+	data = {
+		"spider": nama_spider,
+		"data": RESULTS[nama_spider]
+	}
+
+	feedback = requests.post(url=RECEIVER_ENDPOINT, json=data)
 
 ###############################################################
 

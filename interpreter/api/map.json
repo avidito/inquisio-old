@@ -1,0 +1,44 @@
+
+{
+    "DETIK": 
+    {
+        "spider": "detik",
+        "kategori": 
+            {
+                "news": "news",
+                "finance": "finance",
+                "health": "health"
+            },
+        "tanggal": "%m/%d/%Y"
+    },
+
+    "KOMPAS":
+    {
+        "spider": "kompas",
+        "kategori": 
+            {
+                "all": "all"
+            },
+        "tanggal": "%Y-%m-%d"
+    },
+
+    "OKEZONE":
+    {
+        "spider": "okezone",
+        "kategori":
+            {
+                "all": "1"
+            },
+        "tanggal": "%Y/%m/%d"
+    },
+    
+    "SINDONEWS":
+    {
+        "spider": "sindonews",
+        "kategori":
+            {
+                "all": "0"
+            },
+        "tanggal": "%Y-%m-%d"
+    }
+}

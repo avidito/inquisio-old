@@ -3,8 +3,8 @@ from api import db
 
 class Catatan(db.Model):
 	_id = db.Column(db.Integer, primary_key=True)
-	tugas_id = db.Column(db.String, nullable=False)
-	tanggal = db.Column(db.DateTime, nullable=False)
+	tugas_id = db.Column(db.Integer, nullable=False)
+	waktu = db.Column(db.DateTime, nullable=False)
 	spider = db.Column(db.String, nullable=False)
 	status = db.Column(db.String, nullable=False)
 	pesan = db.Column(db.String)
