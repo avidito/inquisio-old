@@ -2,8 +2,8 @@
 from flask import request, jsonify
 
 # Modul Projek
-from . import app
-from .service import penugasan_spider, ekstraksi_hasil
+from api import app
+from api.services import penugasan_spider, ekstraksi_hasil
 
 
 # Testing Koneksi

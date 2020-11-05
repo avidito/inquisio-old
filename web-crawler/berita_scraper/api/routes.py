@@ -2,22 +2,16 @@
 from flask import request, jsonify
 
 # Modul Projek
-from . import app
-from .service import penugasan_spider, ekstraksi_hasil
+from api import app
+from api.services import crawling, extract_results
 
 
-# Testing Koneksi
-@app.route("/")
-def indeks():
-	return "<h1>Flask sudah berjalan</h1>"
-
-
-# API untuk menjalankan Spider
+# API untuk membuat Spider memulai proses crawling
 # Argumen : spider, kategori, tanggal, jumlah
-@app.route("/api/crawl/berita", methods=["POST"])
-def mulai_crawling_berita():
+@app.route("/api/spider", methods=["POST"])
+def spider_worker():
 	
-	# Jika ada argumen "spider", lakukan penugasan dan kembalikan hasil scraping
+	# Jika ada argumen "spider", lakukan penugasan
 	# Selainnya, kembalikan pesan untuk mengisi argumen
 	if ("spider" in request.json):
 		spider = request.json["spider"]
@@ -28,13 +22,13 @@ def mulai_crawling_berita():
 		jumlah = request.json.get("jumlah")
 
 		# Jalankan service
-		pesan = penugasan_spider(spider, kategori, tanggal, jumlah)
-		return jsonify(pesan)
+		message = crawling(spider, kategori, tanggal, jumlah)
+		return jsonify(message)
 
 	else:
 		return jsonify({
 				"status": "ditolak",
-				"message": "'spider' belum dispesifikasikan",
+				"pesan": "'spider' tidak dispesifikasikan",
 			})
 
 # API untuk mengekstraksi hasil crawling oleh Spider
@@ -46,10 +40,10 @@ def hasil_crawling_berita(spider=None):
 	# Jika ada argumen "spider", ekstraksi hasil scraping (jika sudah ada)
 	# Selainnya, kembalikan pesan untuk mengisi argumen
 	if (spider is not None):
-		hasil = ekstraksi_hasil(spider)
+		hasil = extract_results(spider)
 		return jsonify(hasil)
 	else:
 		return jsonify({
 				"status": "ditolak",
-				"message": "'spider' belum dispesifikasikan",
+				"message": "'spider' tidak dispesifikan",
 			})
