@@ -5,6 +5,9 @@ from api import db
 from api.models import Catatan
 
 
+SPIDER_ENDPOINT = "http://localhost:5000/api/post/"
+ME_ENDPOINT = "http://localhost:5000/api/get"
+
 spiders = json.load(open("api/map.json"))
 list_spider = []
 
@@ -14,19 +17,21 @@ spider_counts = 0
 result_data = []
 current_id = -1
 
+
+
 def order_process(perintah_id, kategori, tanggal, jumlah):
 
+	global SPIDER_ENDPOINT
 	global spider_counts
 	global list_spider
 	global current_id
 
 	current_id = perintah_id
-	url = "http://localhost:5000/api/post/"
 
 	for spider in spiders:
 		if spiders[spider]["kategori"].get(kategori):
 			spider_counts += 1
-			order_url = url + spiders[spider]["spider"]
+			order_url = SPIDER_ENDPOINT + spiders[spider]["spider"]
 			order_data = {
 				"kategori": spiders[spider]["kategori"][kategori],
 				"tanggal": datetime.strptime(tanggal, "%d%m%Y").strftime(spiders[spider]["tanggal"]),
@@ -77,13 +82,12 @@ def receiver_process(spider, data):
 	db.session.commit()
 
 	if counter == spider_counts:
-		receiver_url = "http://localhost:5000/api/get"
 		receiver_data = {
 			"perintah_id": current_id,
 			"data": result_data
 		}
 
-		request_data = requests.post(url=receiver_url, json=receiver_data)
+		request_data = requests.post(url=ME_ENDPOINT, json=receiver_data)
 		result = request_data.json()
 
 		result_data = []
