@@ -2,7 +2,7 @@ from flask import jsonify, request
 
 from api import app
 from api.models import Catatan
-from api.serializer import CatatanSchema
+from api.serializers import CatatanSchema
 
 from api.services import mapping, receiver_process
 
@@ -50,3 +50,39 @@ def receiver():
 	result = receiver_process(spider, data)
 
 	return jsonify (result)
+
+
+####################### UTILITY #######################
+
+from api import db
+from api.models import Catatan
+from api.serializers import CatatanSchema
+
+dc_schema = CatatanSchema(many=True)
+utility = {
+		"catatan": (Catatan, dc_schema)
+	}
+
+
+# Cek Tabel
+@app.route("/api/cek", methods=["GET"])
+def cek_tabel():
+	nama = request.args.get("tabel")
+	t, s = utility[nama]
+
+	return s.jsonify(t.query.all())
+
+# Reset Tabel
+@app.route("/api/reset", methods=["DELETE"])
+def reset_tabel():
+	nama = request.args.get("tabel")
+	t = utility[nama][0]
+	
+	daftar = t.query.all()
+	for data in daftar:
+		db.session.delete(data)
+
+	db.session.commit()
+	return jsonify({
+			"pesan": "tabel {} sudah di-reset".format(nama)
+		})
