@@ -32,3 +32,21 @@ def pesan(parameter):
 			"status": "ditolak",
 			"pesan": "parameter tidak sesuai"
 		}
+
+
+def cek(parameter):
+	tugas_id = parameter.get("tugas_id")
+
+	feedback = requests.get(url=OBSERVER_ENDPOINT, params={"tugas_id": tugas_id})
+	result = feedback.json()
+
+	return result
+
+
+def result(parameter):
+	tugas_id = parameter.get("tugas_id")
+
+	feedback = requests.get(url=RESULT_ENDPOINT, params={"tugas_id": tugas_id})
+	result = feedback.json()
+
+	return result
