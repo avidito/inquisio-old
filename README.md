@@ -28,7 +28,7 @@ Alur kerja dari sistem dijabarkan sebagai berikut:
 
 ## Arsitektur Sistem
 ### Alur Data
-![diagram-alir-data](https://github.com/avidito/inquisio/blob/master/media/draft-skema-web-crawler.png)
+![diagram-alir-data](https://github.com/leniangraeni/inquisio-old/blob/master/media/draft-skema-web-crawler.png)
 
 **Diagram Alir Data Inquisio**
 
